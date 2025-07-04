@@ -93,9 +93,8 @@ class Memory:
             "current_management_skill": agent.management_skill,
         }
 
-        # Append to temporal memory
-        new_df = pl.DataFrame([new_record])
-        self.temporal_memory = pl.concat([self.temporal_memory, new_df])
+        # Append to temporal memory buffer
+        self._temporal_memory_buffer.append(new_record)
 
         return node_id
 
