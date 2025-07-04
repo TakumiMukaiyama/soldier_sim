@@ -1,0 +1,97 @@
+[
+  {
+    "id": "agent_1",
+    "age": 32,
+    "rank": "captain",
+    "personality": {
+      "extroversion": 0.7,
+      "conscientiousness": 0.8,
+      "agreeableness": 0.6,
+      "neuroticism": 0.3,
+      "openness": 0.5
+    },
+    "initial_stats": {
+      "energy": 0.9,
+      "social": 0.6,
+      "hunger": 0.2,
+      "weapon_strength": 0.7,
+      "management_skill": 0.8
+    }
+  },
+  {
+    "id": "agent_2",
+    "age": 28,
+    "rank": "lieutenant",
+    "personality": {
+      "extroversion": 0.5,
+      "conscientiousness": 0.7,
+      "agreeableness": 0.6,
+      "neuroticism": 0.4,
+      "openness": 0.6
+    },
+    "initial_stats": {
+      "energy": 0.8,
+      "social": 0.5,
+      "hunger": 0.3,
+      "weapon_strength": 0.6,
+      "management_skill": 0.7
+    }
+  },
+  {
+    "id": "agent_3",
+    "age": 24,
+    "rank": "sergeant",
+    "personality": {
+      "extroversion": 0.6,
+      "conscientiousness": 0.7,
+      "agreeableness": 0.5,
+      "neuroticism": 0.4,
+      "openness": 0.5
+    },
+    "initial_stats": {
+      "energy": 0.9,
+      "social": 0.5,
+      "hunger": 0.2,
+      "weapon_strength": 0.8,
+      "management_skill": 0.6
+    }
+  },
+  {
+    "id": "agent_4",
+    "age": 22,
+    "rank": "corporal",
+    "personality": {
+      "extroversion": 0.4,
+      "conscientiousness": 0.6,
+      "agreeableness": 0.5,
+      "neuroticism": 0.5,
+      "openness": 0.4
+    },
+    "initial_stats": {
+      "energy": 0.8,
+      "social": 0.4,
+      "hunger": 0.3,
+      "weapon_strength": 0.7,
+      "management_skill": 0.5
+    }
+  },
+  {
+    "id": "agent_5",
+    "age": 21,
+    "rank": "private",
+    "personality": {
+      "extroversion": 0.5,
+      "conscientiousness": 0.5,
+      "agreeableness": 0.6,
+      "neuroticism": 0.6,
+      "openness": 0.5
+    },
+    "initial_stats": {
+      "energy": 0.9,
+      "social": 0.5,
+      "hunger": 0.3,
+      "weapon_strength": 0.6,
+      "management_skill": 0.3
+    }
+  }
+]
