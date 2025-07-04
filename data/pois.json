@@ -1,0 +1,177 @@
+[
+  {
+    "id": "training_ground_1",
+    "name": "Main Training Field",
+    "category": "training",
+    "location": [10.0, 20.0],
+    "belief": {
+      "satisfaction": 0.7,
+      "price": 0.5,
+      "convenience": 0.8,
+      "atmosphere": 0.6
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": -0.2,
+      "hunger": 0.1,
+      "social": 0.1,
+      "weapon_strength": 0.15,
+      "management_skill": 0.05
+    }
+  },
+  {
+    "id": "training_ground_2",
+    "name": "Advanced Combat Zone",
+    "category": "training",
+    "location": [15.0, 25.0],
+    "belief": {
+      "satisfaction": 0.6,
+      "price": 0.5,
+      "convenience": 0.6,
+      "atmosphere": 0.5
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": -0.3,
+      "hunger": 0.15,
+      "social": 0.05,
+      "weapon_strength": 0.25,
+      "management_skill": 0.0
+    }
+  },
+  {
+    "id": "cafeteria_1",
+    "name": "Main Cafeteria",
+    "category": "food",
+    "location": [5.0, 10.0],
+    "belief": {
+      "satisfaction": 0.6,
+      "price": 0.7,
+      "convenience": 0.8,
+      "atmosphere": 0.5
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": 0.1,
+      "hunger": -0.5,
+      "social": 0.2,
+      "weapon_strength": 0.0,
+      "management_skill": 0.0
+    }
+  },
+  {
+    "id": "cafeteria_2",
+    "name": "Officer's Mess",
+    "category": "food",
+    "location": [8.0, 12.0],
+    "belief": {
+      "satisfaction": 0.8,
+      "price": 0.4,
+      "convenience": 0.6,
+      "atmosphere": 0.7
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": 0.15,
+      "hunger": -0.6,
+      "social": 0.3,
+      "weapon_strength": 0.0,
+      "management_skill": 0.05
+    }
+  },
+  {
+    "id": "barracks_1",
+    "name": "Main Barracks",
+    "category": "rest",
+    "location": [3.0, 5.0],
+    "belief": {
+      "satisfaction": 0.5,
+      "price": 0.8,
+      "convenience": 0.7,
+      "atmosphere": 0.4
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": 0.4,
+      "hunger": 0.0,
+      "social": -0.1,
+      "weapon_strength": 0.0,
+      "management_skill": 0.0
+    }
+  },
+  {
+    "id": "office_1",
+    "name": "Command Center",
+    "category": "office",
+    "location": [20.0, 5.0],
+    "belief": {
+      "satisfaction": 0.4,
+      "price": 0.5,
+      "convenience": 0.5,
+      "atmosphere": 0.6
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": -0.1,
+      "hunger": 0.05,
+      "social": 0.15,
+      "weapon_strength": 0.0,
+      "management_skill": 0.2
+    }
+  },
+  {
+    "id": "armory_1",
+    "name": "Main Armory",
+    "category": "armory",
+    "location": [25.0, 15.0],
+    "belief": {
+      "satisfaction": 0.6,
+      "price": 0.6,
+      "convenience": 0.7,
+      "atmosphere": 0.5
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": -0.05,
+      "hunger": 0.05,
+      "social": 0.05,
+      "weapon_strength": 0.3,
+      "management_skill": 0.0
+    }
+  }
+]
