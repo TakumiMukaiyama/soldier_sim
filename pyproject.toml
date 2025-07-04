@@ -18,6 +18,8 @@ dependencies = [
     "langchain-google-genai>=2.1.6",
     "langchain-openai>=0.3.27",
     "ruff>=0.12.2",
+    "jupyter>=1.1.1",
+    "ipykernel>=6.29.5",
 ]
 
 [project.optional-dependencies]
