@@ -1,0 +1,40 @@
+# Production configuration for city-sim
+
+# Simulation parameters
+simulation:
+  days: 100
+  time_steps_per_day: 8
+  start_hour: 6  # Simulation starts at 6am
+
+# Agent parameters
+agents:
+  count: 100
+  energy_decay_rate: 0.05  # Energy decrease per time step
+  hunger_increase_rate: 0.08  # Hunger increase per time step
+  social_need_base_rate: 0.03  # Base social need increase rate
+  
+# POI parameters
+pois:
+  count: 20
+  categories:
+    - training
+    - food
+    - rest
+    - office
+    - armory
+  distribution:
+    training: 0.4
+    food: 0.2
+    rest: 0.2
+    office: 0.1
+    armory: 0.1
+    
+# Memory parameters
+memory:
+  max_temporal_size: 10000000  # Maximum number of temporal memory nodes
+  reflective_summary_days: 14  # Number of days to include in reflective summary
+  
+# LLM parameters
+llm:
+  default_provider: "azure"  # Options: "gemini", "azure"
+  request_timeout: 60  # Timeout in seconds
