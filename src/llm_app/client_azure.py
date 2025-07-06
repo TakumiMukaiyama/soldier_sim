@@ -1,8 +1,9 @@
 from typing import Any, Dict, Optional
 import os
 
-from langchain_openai.chat_models import AzureChatOpenAI
-from langchain.schema import SystemMessage, HumanMessage
+
+from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_openai import AzureChatOpenAI
 
 
 class AzureGPTClient:
