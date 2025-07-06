@@ -1,9 +1,9 @@
 import argparse
 import json
 import yaml
+import random
 from datetime import datetime
 from pathlib import Path
-
 
 from src.agent_system.agent import Agent
 from src.agent_system.poi import POI
@@ -20,11 +20,49 @@ def load_config(config_path):
         return yaml.safe_load(f)
 
 
-def load_agents(personas_path):
+def load_agents(personas_path, count=None):
     """Load agent personas from JSON file"""
     with open(personas_path, "r") as f:
         data = json.load(f)
-
+    
+    # If a specific count is requested, handle it
+    if count is not None:
+        if count <= len(data):
+            # If we need fewer agents than available, sample randomly
+            data = random.sample(data, count)
+        else:
+            # If we need more agents than available, clone and modify existing ones
+            original_count = len(data)
+            for i in range(original_count, count):
+                # Clone a random persona
+                new_persona = random.choice(data).copy()
+                
+                # Modify the cloned persona to make it unique
+                new_persona["id"] = f"agent_{i+1}"
+                
+                # Randomize some attributes
+                new_persona["age"] = random.randint(19, 40)
+                
+                # Determine rank based on age and random factor
+                ranks = ["private", "corporal", "sergeant", "lieutenant", "captain"]
+                rank_weights = [0.5, 0.25, 0.15, 0.07, 0.03]  # More lower ranks
+                if new_persona["age"] > 30:
+                    rank_weights = [0.2, 0.3, 0.3, 0.15, 0.05]  # More higher ranks for older agents
+                new_persona["rank"] = random.choices(ranks, weights=rank_weights)[0]
+                
+                # Randomize personality slightly
+                for trait in new_persona["personality"]:
+                    new_persona["personality"][trait] = max(0.1, min(0.9, 
+                                                                    new_persona["personality"][trait] + random.uniform(-0.2, 0.2)))
+                
+                # Randomize initial stats slightly
+                for stat in new_persona["initial_stats"]:
+                    new_persona["initial_stats"][stat] = max(0.1, min(0.9, 
+                                                                     new_persona["initial_stats"][stat] + random.uniform(-0.15, 0.15)))
+                
+                # Add to data
+                data.append(new_persona)
+    
     agents = []
     for persona in data:
         agent = Agent(
@@ -47,11 +85,48 @@ def load_agents(personas_path):
     return agents
 
 
-def load_pois(pois_path):
+def load_pois(pois_path, count=None):
     """Load POIs from JSON file"""
     with open(pois_path, "r") as f:
         data = json.load(f)
-
+    
+    # If a specific count is requested, handle it
+    if count is not None:
+        if count <= len(data):
+            # If we need fewer POIs than available, sample randomly
+            data = random.sample(data, count)
+        else:
+            # If we need more POIs than available, clone and modify existing ones
+            original_count = len(data)
+            categories = ["training", "food", "rest", "office", "armory", "recreation"]
+            
+            for i in range(original_count, count):
+                # Clone a random POI
+                new_poi = random.choice(data).copy()
+                
+                # Modify the cloned POI to make it unique
+                new_poi["id"] = f"{new_poi['category']}_{i+1}"
+                new_poi["name"] = f"{new_poi['category'].title()} Area {i+1}"
+                
+                # Randomize location
+                new_poi["location"] = [random.uniform(0, 50), random.uniform(0, 50)]
+                
+                # Randomize belief slightly
+                for belief in new_poi["belief"]:
+                    new_poi["belief"][belief] = max(0.1, min(0.9, new_poi["belief"][belief] + random.uniform(-0.2, 0.2)))
+                
+                # Randomize effects slightly
+                for effect in new_poi["effects"]:
+                    # Keep the sign of the effect, but randomize magnitude
+                    original = new_poi["effects"][effect]
+                    sign = 1 if original >= 0 else -1
+                    magnitude = abs(original)
+                    new_magnitude = magnitude * random.uniform(0.8, 1.2)
+                    new_poi["effects"][effect] = sign * new_magnitude
+                
+                # Add to data
+                data.append(new_poi)
+    
     pois = []
     for poi_data in data:
         poi = POI(
@@ -165,8 +240,31 @@ def main():
     parser.add_argument(
         "--output", type=str, default="output", help="Output directory for results"
     )
+    parser.add_argument(
+        "--agent-count", 
+        type=int, 
+        default=None,
+        help="Number of agents to simulate (default: use all available in JSON)",
+    )
+    parser.add_argument(
+        "--poi-count", 
+        type=int, 
+        default=None,
+        help="Number of POIs to use in simulation (default: use all available in JSON)",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=None,
+        help="Random seed for reproducible simulations",
+    )
 
     args = parser.parse_args()
+    
+    # Set random seed if specified
+    if args.seed is not None:
+        random.seed(args.seed)
+        print(f"Using random seed: {args.seed}")
 
     # Load settings and config
     settings = get_settings()
@@ -175,8 +273,14 @@ def main():
     # Override settings from command line args
     days = args.days or config["simulation"]["days"]
     steps_per_day = args.steps or config["simulation"]["time_steps_per_day"]
+    agent_count = args.agent_count or config["agents"].get("count", None)
+    poi_count = args.poi_count or config["pois"].get("count", None)
 
     print(f"Running simulation for {days} days with {steps_per_day} steps per day")
+    if agent_count:
+        print(f"Using {agent_count} agents")
+    if poi_count:
+        print(f"Using {poi_count} POIs")
 
     # Initialize LLM planner if requested
     planner = None
@@ -195,13 +299,13 @@ def main():
     )
 
     # Load and add agents
-    agents = load_agents(args.agents)
+    agents = load_agents(args.agents, count=agent_count)
     print(f"Loaded {len(agents)} agents")
     for agent in agents:
         simulation.add_agent(agent)
 
     # Load and add POIs
-    pois = load_pois(args.pois)
+    pois = load_pois(args.pois, count=poi_count)
     print(f"Loaded {len(pois)} POIs")
     for poi in pois:
         simulation.add_poi(poi)

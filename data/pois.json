@@ -17,11 +17,11 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": -0.2,
-      "hunger": 0.1,
-      "social": 0.1,
-      "weapon_strength": 0.15,
-      "management_skill": 0.05
+      "energy": -0.15,
+      "hunger": 0.12,
+      "social": 0.08,
+      "weapon_strength": 0.10,
+      "management_skill": 0.03
     }
   },
   {
@@ -42,10 +42,10 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": -0.3,
-      "hunger": 0.15,
-      "social": 0.05,
-      "weapon_strength": 0.25,
+      "energy": -0.25,
+      "hunger": 0.18,
+      "social": 0.04,
+      "weapon_strength": 0.18,
       "management_skill": 0.0
     }
   },
@@ -67,11 +67,11 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": 0.1,
-      "hunger": -0.5,
-      "social": 0.2,
+      "energy": 0.10,
+      "hunger": -0.40,
+      "social": 0.15,
       "weapon_strength": 0.0,
-      "management_skill": 0.0
+      "management_skill": 0.02
     }
   },
   {
@@ -92,11 +92,11 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": 0.15,
-      "hunger": -0.6,
-      "social": 0.3,
+      "energy": 0.12,
+      "hunger": -0.45,
+      "social": 0.20,
       "weapon_strength": 0.0,
-      "management_skill": 0.05
+      "management_skill": 0.07
     }
   },
   {
@@ -117,11 +117,11 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": 0.4,
-      "hunger": 0.0,
-      "social": -0.1,
-      "weapon_strength": 0.0,
-      "management_skill": 0.0
+      "energy": 0.35,
+      "hunger": 0.02,
+      "social": -0.05,
+      "weapon_strength": -0.01,
+      "management_skill": -0.01
     }
   },
   {
@@ -142,11 +142,11 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": -0.1,
-      "hunger": 0.05,
-      "social": 0.15,
+      "energy": -0.08,
+      "hunger": 0.06,
+      "social": 0.12,
       "weapon_strength": 0.0,
-      "management_skill": 0.2
+      "management_skill": 0.15
     }
   },
   {
@@ -168,10 +168,85 @@
     },
     "effects": {
       "energy": -0.05,
-      "hunger": 0.05,
-      "social": 0.05,
-      "weapon_strength": 0.3,
-      "management_skill": 0.0
+      "hunger": 0.04,
+      "social": 0.03,
+      "weapon_strength": 0.22,
+      "management_skill": 0.05
+    }
+  },
+  {
+    "id": "training_ground_3",
+    "name": "Tactical Drills Field",
+    "category": "training",
+    "location": [12.0, 18.0],
+    "belief": {
+      "satisfaction": 0.65,
+      "price": 0.6,
+      "convenience": 0.7,
+      "atmosphere": 0.5
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": -0.18,
+      "hunger": 0.15,
+      "social": 0.13,
+      "weapon_strength": 0.12,
+      "management_skill": 0.08
+    }
+  },
+  {
+    "id": "recreation_1",
+    "name": "Recreation Room",
+    "category": "recreation",
+    "location": [7.0, 8.0],
+    "belief": {
+      "satisfaction": 0.8,
+      "price": 0.7,
+      "convenience": 0.8,
+      "atmosphere": 0.8
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": 0.05,
+      "hunger": 0.03,
+      "social": 0.25,
+      "weapon_strength": -0.01,
+      "management_skill": 0.03
+    }
+  },
+  {
+    "id": "office_2",
+    "name": "Strategy Room",
+    "category": "office",
+    "location": [18.0, 7.0],
+    "belief": {
+      "satisfaction": 0.5,
+      "price": 0.5,
+      "convenience": 0.6,
+      "atmosphere": 0.7
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": -0.12,
+      "hunger": 0.07,
+      "social": 0.10,
+      "weapon_strength": 0.05,
+      "management_skill": 0.17
     }
   }
 ]

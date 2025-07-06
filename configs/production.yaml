@@ -9,9 +9,9 @@ simulation:
 # Agent parameters
 agents:
   count: 100
-  energy_decay_rate: 0.05  # Energy decrease per time step
-  hunger_increase_rate: 0.08  # Hunger increase per time step
-  social_need_base_rate: 0.03  # Base social need increase rate
+  energy_decay_rate: 0.1  # Energy decrease per time step
+  hunger_increase_rate: 0.1  # Hunger increase per time step
+  social_need_base_rate: 0.05  # Base social need increase rate
   
 # POI parameters
 pois:

@@ -93,5 +93,290 @@
       "weapon_strength": 0.6,
       "management_skill": 0.3
     }
+  },
+  {
+    "id": "agent_6",
+    "age": 19,
+    "rank": "private",
+    "personality": {
+      "extroversion": 0.7,
+      "conscientiousness": 0.4,
+      "agreeableness": 0.7,
+      "neuroticism": 0.5,
+      "openness": 0.6
+    },
+    "initial_stats": {
+      "energy": 0.95,
+      "social": 0.7,
+      "hunger": 0.4,
+      "weapon_strength": 0.4,
+      "management_skill": 0.2
+    }
+  },
+  {
+    "id": "agent_7",
+    "age": 20,
+    "rank": "private",
+    "personality": {
+      "extroversion": 0.3,
+      "conscientiousness": 0.7,
+      "agreeableness": 0.4,
+      "neuroticism": 0.4,
+      "openness": 0.5
+    },
+    "initial_stats": {
+      "energy": 0.85,
+      "social": 0.3,
+      "hunger": 0.2,
+      "weapon_strength": 0.5,
+      "management_skill": 0.25
+    }
+  },
+  {
+    "id": "agent_8",
+    "age": 23,
+    "rank": "corporal",
+    "personality": {
+      "extroversion": 0.6,
+      "conscientiousness": 0.5,
+      "agreeableness": 0.4,
+      "neuroticism": 0.6,
+      "openness": 0.3
+    },
+    "initial_stats": {
+      "energy": 0.75,
+      "social": 0.6,
+      "hunger": 0.3,
+      "weapon_strength": 0.65,
+      "management_skill": 0.4
+    }
+  },
+  {
+    "id": "agent_9",
+    "age": 25,
+    "rank": "sergeant",
+    "personality": {
+      "extroversion": 0.5,
+      "conscientiousness": 0.8,
+      "agreeableness": 0.3,
+      "neuroticism": 0.3,
+      "openness": 0.6
+    },
+    "initial_stats": {
+      "energy": 0.8,
+      "social": 0.5,
+      "hunger": 0.25,
+      "weapon_strength": 0.75,
+      "management_skill": 0.55
+    }
+  },
+  {
+    "id": "agent_10",
+    "age": 30,
+    "rank": "lieutenant",
+    "personality": {
+      "extroversion": 0.6,
+      "conscientiousness": 0.7,
+      "agreeableness": 0.6,
+      "neuroticism": 0.3,
+      "openness": 0.7
+    },
+    "initial_stats": {
+      "energy": 0.85,
+      "social": 0.6,
+      "hunger": 0.2,
+      "weapon_strength": 0.65,
+      "management_skill": 0.7
+    }
+  },
+  {
+    "id": "agent_11",
+    "age": 21,
+    "rank": "private",
+    "personality": {
+      "extroversion": 0.8,
+      "conscientiousness": 0.4,
+      "agreeableness": 0.7,
+      "neuroticism": 0.6,
+      "openness": 0.6
+    },
+    "initial_stats": {
+      "energy": 0.9,
+      "social": 0.8,
+      "hunger": 0.35,
+      "weapon_strength": 0.45,
+      "management_skill": 0.2
+    }
+  },
+  {
+    "id": "agent_12",
+    "age": 22,
+    "rank": "private",
+    "personality": {
+      "extroversion": 0.3,
+      "conscientiousness": 0.6,
+      "agreeableness": 0.5,
+      "neuroticism": 0.7,
+      "openness": 0.4
+    },
+    "initial_stats": {
+      "energy": 0.75,
+      "social": 0.3,
+      "hunger": 0.2,
+      "weapon_strength": 0.5,
+      "management_skill": 0.3
+    }
+  },
+  {
+    "id": "agent_13",
+    "age": 24,
+    "rank": "corporal",
+    "personality": {
+      "extroversion": 0.5,
+      "conscientiousness": 0.7,
+      "agreeableness": 0.6,
+      "neuroticism": 0.4,
+      "openness": 0.5
+    },
+    "initial_stats": {
+      "energy": 0.85,
+      "social": 0.5,
+      "hunger": 0.25,
+      "weapon_strength": 0.6,
+      "management_skill": 0.45
+    }
+  },
+  {
+    "id": "agent_14",
+    "age": 27,
+    "rank": "sergeant",
+    "personality": {
+      "extroversion": 0.4,
+      "conscientiousness": 0.8,
+      "agreeableness": 0.4,
+      "neuroticism": 0.3,
+      "openness": 0.5
+    },
+    "initial_stats": {
+      "energy": 0.8,
+      "social": 0.4,
+      "hunger": 0.2,
+      "weapon_strength": 0.7,
+      "management_skill": 0.6
+    }
+  },
+  {
+    "id": "agent_15",
+    "age": 20,
+    "rank": "private",
+    "personality": {
+      "extroversion": 0.6,
+      "conscientiousness": 0.5,
+      "agreeableness": 0.7,
+      "neuroticism": 0.5,
+      "openness": 0.6
+    },
+    "initial_stats": {
+      "energy": 0.9,
+      "social": 0.6,
+      "hunger": 0.3,
+      "weapon_strength": 0.4,
+      "management_skill": 0.2
+    }
+  },
+  {
+    "id": "agent_16",
+    "age": 29,
+    "rank": "lieutenant",
+    "personality": {
+      "extroversion": 0.5,
+      "conscientiousness": 0.8,
+      "agreeableness": 0.5,
+      "neuroticism": 0.3,
+      "openness": 0.7
+    },
+    "initial_stats": {
+      "energy": 0.8,
+      "social": 0.5,
+      "hunger": 0.2,
+      "weapon_strength": 0.7,
+      "management_skill": 0.75
+    }
+  },
+  {
+    "id": "agent_17",
+    "age": 35,
+    "rank": "captain",
+    "personality": {
+      "extroversion": 0.6,
+      "conscientiousness": 0.9,
+      "agreeableness": 0.5,
+      "neuroticism": 0.2,
+      "openness": 0.6
+    },
+    "initial_stats": {
+      "energy": 0.85,
+      "social": 0.6,
+      "hunger": 0.15,
+      "weapon_strength": 0.75,
+      "management_skill": 0.85
+    }
+  },
+  {
+    "id": "agent_18",
+    "age": 23,
+    "rank": "corporal",
+    "personality": {
+      "extroversion": 0.7,
+      "conscientiousness": 0.6,
+      "agreeableness": 0.6,
+      "neuroticism": 0.4,
+      "openness": 0.5
+    },
+    "initial_stats": {
+      "energy": 0.9,
+      "social": 0.7,
+      "hunger": 0.25,
+      "weapon_strength": 0.65,
+      "management_skill": 0.4
+    }
+  },
+  {
+    "id": "agent_19",
+    "age": 21,
+    "rank": "private",
+    "personality": {
+      "extroversion": 0.4,
+      "conscientiousness": 0.5,
+      "agreeableness": 0.6,
+      "neuroticism": 0.6,
+      "openness": 0.4
+    },
+    "initial_stats": {
+      "energy": 0.8,
+      "social": 0.4,
+      "hunger": 0.3,
+      "weapon_strength": 0.55,
+      "management_skill": 0.25
+    }
+  },
+  {
+    "id": "agent_20",
+    "age": 26,
+    "rank": "sergeant",
+    "personality": {
+      "extroversion": 0.5,
+      "conscientiousness": 0.7,
+      "agreeableness": 0.5,
+      "neuroticism": 0.4,
+      "openness": 0.6
+    },
+    "initial_stats": {
+      "energy": 0.85,
+      "social": 0.5,
+      "hunger": 0.2,
+      "weapon_strength": 0.7,
+      "management_skill": 0.6
+    }
   }
 ]
