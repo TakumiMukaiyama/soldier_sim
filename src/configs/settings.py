@@ -16,7 +16,7 @@ class AppSettings(BaseSettings):
 
     # Simulation Settings
     simulation_days: int = 100
-    poi_count: int = 20
+    poi_count: int = 100
     agent_count: int = 100
     time_steps_per_day: int = 8
 
