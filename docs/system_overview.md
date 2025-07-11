@@ -308,6 +308,76 @@ belief_vector = {
 - **Social**: 社会的欲求（0.0-1.0）
 - **Weapon Strength**: 武器技能（0.0-1.0）
 - **Management Skill**: 管理技能（0.0-1.0）
+- **Sociability**: 社会性・コミュニケーション能力（0.0-1.0）
+
+#### 2.3.1.1 基本状態パラメータ（消耗/回復型）
+
+**Energy（エネルギー）**: 体力・精神力
+- 時間経過で減少
+- 休憩や食事で回復
+
+**Social（社会的欲求）**: 社会的交流への欲求
+- 性格に基づいて変化（外向的な人ほど早く減少）
+- 他者との交流で回復
+
+**Hunger（空腹度）**: 空腹レベル
+- 時間経過で増加
+- 食事で減少
+
+#### 2.3.1.2 スキルパラメータ（成長型）
+
+**Weapon Strength（武器技能）**: 戦闘・武器操作技能
+- 訓練により向上
+- 非実施時に自然減少
+
+**Management Skill（管理技能）**: 指導力・リーダーシップ
+- 管理業務により向上
+- 経験により向上
+- **育成ゲーム設計**: 初期値は 0.0〜0.3 に制限（成長の余地を確保）
+
+**Sociability（社会性）**: コミュニケーション能力・人間性
+- 社会的活動により向上
+- 性格特性（協調性・外向性）に強く影響される
+- チームワークや情報伝達の効率性に影響
+- 低下が他のスキルより緩やか（社会性は一度身につくと保持されやすい）
+
+#### 2.3.1.2.1 育成ゲーム設計方針
+
+本システムは育成ゲームとして設計されており、以下の方針に基づいています：
+
+**初期スキルレベルの制限**:
+- **Management Skill**: 0.0〜0.3（最大成長幅 0.7）
+- **Weapon Strength**: 0.4〜0.8（中程度の成長幅）
+- **Sociability**: 0.3〜0.8（性格に依存した成長幅）
+
+**階級による初期値の差異**:
+- **Private**: Management Skill 0.0〜0.05（新人レベル）
+- **Corporal**: Management Skill 0.08〜0.12（初級リーダー）
+- **Sergeant**: Management Skill 0.15〜0.20（中級リーダー）
+- **Lieutenant**: Management Skill 0.22〜0.28（上級リーダー）
+- **Captain**: Management Skill 0.28〜0.30（最高初期レベル）
+
+**成長の余地を確保**:
+```python
+# 最大到達可能レベル例
+max_levels = {
+    "private": {"management_skill": 0.7},
+    "captain": {"management_skill": 1.0}
+}
+```
+
+これにより、プレイヤーはエージェントの成長を長期間にわたって楽しめる設計となっています。
+
+#### 2.3.1.3 性格特性による影響
+
+**Sociability の上限値計算**:
+```python
+personality_modifier = ((agreeableness + extroversion) / 2 - 0.5) * 0.3
+sociability_cap = min(1.0, sociability_cap * (1 + personality_modifier))
+```
+
+- **協調性（Agreeableness）**: 他者との協力能力
+- **外向性（Extroversion）**: 社会的エネルギーと積極性
 
 #### 2.3.2 需要更新式
 
@@ -328,10 +398,32 @@ $$\text{social}_{\text{change}} = 0.03 \times \Delta t \times \text{personality}
 
 $$\text{social}_{\text{new}} = \max(0.0, \min(1.0, \text{social}_{\text{current}} - \text{social}_{\text{change}}))$$
 
+**社会性スキル変化**
+$$\text{sociability}_{\text{decay}} = 0.005 \times \Delta t \times \text{decay}_{\text{factor}}$$
+
+$$\text{sociability}_{\text{new}} = \max(\text{baseline}, \text{sociability}_{\text{current}} - \text{sociability}_{\text{decay}})$$
+
 where:
 - $\Delta t$: 時間変化量（デフォルト: 1.0）
 - $\mathcal{U}(0.8, 1.2)$: 0.8から1.2までの一様分布による個人差
 - $\text{personality}_{\text{factor}}$: 性格による係数
+- $\text{baseline}$: スキルの基準値（0.3）
+
+#### 2.3.3 軍事組織における Sociability の意味
+
+**高い社会性（0.7-1.0）**:
+- 効果的なコミュニケーション
+- チーム内での信頼関係構築
+- 情報共有の質向上
+- 部下や仲間との良好な関係
+- 指示伝達の正確性
+
+**低い社会性（0.0-0.3）**:
+- コミュニケーション不足
+- 誤解や対立の発生
+- チームワークの阻害
+- 情報伝達の問題
+- 孤立傾向
 
 #### 2.3.3 収穫逓減効果
 

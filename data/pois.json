@@ -21,7 +21,8 @@
       "hunger": 0.12,
       "social": 0.08,
       "weapon_strength": 0.10,
-      "management_skill": 0.03
+      "management_skill": 0.03,
+      "sociability": 0.05
     }
   },
   {
@@ -46,7 +47,8 @@
       "hunger": 0.18,
       "social": 0.04,
       "weapon_strength": 0.18,
-      "management_skill": 0.0
+      "management_skill": 0.0,
+      "sociability": 0.03
     }
   },
   {
@@ -71,7 +73,8 @@
       "hunger": -0.40,
       "social": 0.15,
       "weapon_strength": 0.0,
-      "management_skill": 0.02
+      "management_skill": 0.02,
+      "sociability": 0.12
     }
   },
   {
@@ -96,7 +99,8 @@
       "hunger": -0.45,
       "social": 0.20,
       "weapon_strength": 0.0,
-      "management_skill": 0.07
+      "management_skill": 0.07,
+      "sociability": 0.15
     }
   },
   {
@@ -121,7 +125,8 @@
       "hunger": 0.02,
       "social": -0.05,
       "weapon_strength": -0.01,
-      "management_skill": -0.01
+      "management_skill": -0.01,
+      "sociability": 0.08
     }
   },
   {
@@ -146,7 +151,8 @@
       "hunger": 0.06,
       "social": 0.12,
       "weapon_strength": 0.0,
-      "management_skill": 0.15
+      "management_skill": 0.15,
+      "sociability": 0.10
     }
   },
   {
@@ -171,7 +177,8 @@
       "hunger": 0.04,
       "social": 0.03,
       "weapon_strength": 0.22,
-      "management_skill": 0.05
+      "management_skill": 0.05,
+      "sociability": 0.07
     }
   },
   {
@@ -196,7 +203,8 @@
       "hunger": 0.15,
       "social": 0.13,
       "weapon_strength": 0.12,
-      "management_skill": 0.08
+      "management_skill": 0.08,
+      "sociability": 0.10
     }
   },
   {
@@ -221,7 +229,8 @@
       "hunger": 0.03,
       "social": 0.25,
       "weapon_strength": -0.01,
-      "management_skill": 0.03
+      "management_skill": 0.03,
+      "sociability": 0.20
     }
   },
   {
@@ -246,7 +255,8 @@
       "hunger": 0.07,
       "social": 0.10,
       "weapon_strength": 0.05,
-      "management_skill": 0.17
+      "management_skill": 0.17,
+      "sociability": 0.15
     }
   }
 ]
