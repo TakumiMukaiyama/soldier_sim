@@ -45,7 +45,12 @@ class Agent:
         self._management_sessions = 0
         self._social_sessions = 0
         self._daily_activities = []
-        self._skill_caps = {"weapon_strength": 0.7, "management_skill": 0.7, "social": 0.7, "sociability": 0.8}
+        self._skill_caps = {
+            "weapon_strength": 0.7,
+            "management_skill": 0.7,
+            "social": 0.7,
+            "sociability": 0.8,
+        }
 
     def update_needs(self, time_delta: float = 1.0) -> None:
         """Update agent needs based on time passing"""
@@ -61,7 +66,9 @@ class Agent:
         social_base_change = 0.03 * time_delta
         # Extroverts lose social energy faster when alone
         if self.personality["extroversion"] > 0.5:
-            social_change = social_base_change * (self.personality["extroversion"] + 0.5)
+            social_change = social_base_change * (
+                self.personality["extroversion"] + 0.5
+            )
         else:
             # Introverts lose social energy more slowly
             social_change = social_base_change * self.personality["extroversion"]
@@ -76,7 +83,9 @@ class Agent:
             self._apply_skill_decay("management_skill", 0.01 * time_delta)
 
         if "socialize" not in self._daily_activities:
-            self._apply_skill_decay("sociability", 0.005 * time_delta)  # Slower decay for social skills
+            self._apply_skill_decay(
+                "sociability", 0.005 * time_delta
+            )  # Slower decay for social skills
 
         # Reset daily activities list if it's getting too long
         if len(self._daily_activities) > 10:
@@ -87,7 +96,9 @@ class Agent:
         current_value = getattr(self, skill)
         # Skills decay slower as they approach baseline values
         baseline = 0.3  # Base skill level
-        decay_factor = max(0.1, (current_value - baseline) / 0.7)  # Higher skills decay faster
+        decay_factor = max(
+            0.1, (current_value - baseline) / 0.7
+        )  # Higher skills decay faster
 
         new_value = current_value - (amount * decay_factor)
         # Don't decay below baseline
@@ -96,7 +107,13 @@ class Agent:
 
     def _update_skill_caps(self) -> None:
         """Update skill caps based on rank and training/management sessions"""
-        rank_multipliers = {"private": 1.0, "corporal": 1.1, "sergeant": 1.2, "lieutenant": 1.3, "captain": 1.4}
+        rank_multipliers = {
+            "private": 1.0,
+            "corporal": 1.1,
+            "sergeant": 1.2,
+            "lieutenant": 1.3,
+            "captain": 1.4,
+        }
 
         # Get multiplier based on rank (default to private)
         rank_mult = rank_multipliers.get(self.rank.lower(), 1.0)
@@ -113,13 +130,21 @@ class Agent:
         extroversion = self.personality.get("extroversion", 0.5)
 
         # Update the skill caps
-        self._skill_caps["weapon_strength"] = min(1.0, weapon_cap * (1 + (conscientiousness - 0.5) * 0.2))
-        self._skill_caps["management_skill"] = min(1.0, management_cap * (1 + (openness - 0.5) * 0.2))
-        self._skill_caps["social"] = min(1.0, 0.7 + (self.personality.get("extroversion", 0.5) * 0.3))
+        self._skill_caps["weapon_strength"] = min(
+            1.0, weapon_cap * (1 + (conscientiousness - 0.5) * 0.2)
+        )
+        self._skill_caps["management_skill"] = min(
+            1.0, management_cap * (1 + (openness - 0.5) * 0.2)
+        )
+        self._skill_caps["social"] = min(
+            1.0, 0.7 + (self.personality.get("extroversion", 0.5) * 0.3)
+        )
 
         # Sociability cap influenced by agreeableness and extroversion
         personality_modifier = ((agreeableness + extroversion) / 2 - 0.5) * 0.3
-        self._skill_caps["sociability"] = min(1.0, sociability_cap * (1 + personality_modifier))
+        self._skill_caps["sociability"] = min(
+            1.0, sociability_cap * (1 + personality_modifier)
+        )
 
     def apply_poi_effect(self, poi_effects: Dict[str, float]) -> None:
         """
@@ -144,20 +169,34 @@ class Agent:
         self._update_skill_caps()
 
         # Apply effects with diminishing returns
-        self._apply_effect_with_diminishing_returns("energy", poi_effects.get("energy", 0))
-        self._apply_effect_with_diminishing_returns("hunger", poi_effects.get("hunger", 0))
-        self._apply_effect_with_diminishing_returns("social", poi_effects.get("social", 0), self._skill_caps["social"])
         self._apply_effect_with_diminishing_returns(
-            "weapon_strength", poi_effects.get("weapon_strength", 0), self._skill_caps["weapon_strength"]
+            "energy", poi_effects.get("energy", 0)
         )
         self._apply_effect_with_diminishing_returns(
-            "management_skill", poi_effects.get("management_skill", 0), self._skill_caps["management_skill"]
+            "hunger", poi_effects.get("hunger", 0)
         )
         self._apply_effect_with_diminishing_returns(
-            "sociability", poi_effects.get("sociability", 0), self._skill_caps["sociability"]
+            "social", poi_effects.get("social", 0), self._skill_caps["social"]
+        )
+        self._apply_effect_with_diminishing_returns(
+            "weapon_strength",
+            poi_effects.get("weapon_strength", 0),
+            self._skill_caps["weapon_strength"],
+        )
+        self._apply_effect_with_diminishing_returns(
+            "management_skill",
+            poi_effects.get("management_skill", 0),
+            self._skill_caps["management_skill"],
+        )
+        self._apply_effect_with_diminishing_returns(
+            "sociability",
+            poi_effects.get("sociability", 0),
+            self._skill_caps["sociability"],
         )
 
-    def _apply_effect_with_diminishing_returns(self, attribute: str, effect: float, cap: float = 1.0) -> None:
+    def _apply_effect_with_diminishing_returns(
+        self, attribute: str, effect: float, cap: float = 1.0
+    ) -> None:
         """
         Apply effect to an attribute with diminishing returns
 

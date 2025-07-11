@@ -134,7 +134,9 @@ class Memory:
         self._flush_buffer()
 
         # Filter memory for this agent on this date
-        daily_df = self.temporal_memory.filter((pl.col("agent_id") == agent_id) & (pl.col("time").str.contains(date)))
+        daily_df = self.temporal_memory.filter(
+            (pl.col("agent_id") == agent_id) & (pl.col("time").str.contains(date))
+        )
 
         if len(daily_df) == 0:
             return {"no_activity": True}
@@ -143,8 +145,15 @@ class Memory:
         summary = {
             "date": date,
             "activity_count": len(daily_df),
-            "activity_distribution": daily_df.groupby("activity_key").count().sort("count", descending=True).to_dict(),
-            "most_visited_poi": daily_df.groupby("poi_id").count().sort("count", descending=True).head(1).to_dict(),
+            "activity_distribution": daily_df.groupby("activity_key")
+            .count()
+            .sort("count", descending=True)
+            .to_dict(),
+            "most_visited_poi": daily_df.groupby("poi_id")
+            .count()
+            .sort("count", descending=True)
+            .head(1)
+            .to_dict(),
             "energy_stats": {
                 "start": daily_df["current_energy"].first(),
                 "end": daily_df["current_energy"].last(),
@@ -175,7 +184,11 @@ class Memory:
         # Flush buffer to ensure all records are in the DataFrame
         self._flush_buffer()
 
-        return self.temporal_memory.filter(pl.col("agent_id") == agent_id).sort("time", descending=True).head(limit)
+        return (
+            self.temporal_memory.filter(pl.col("agent_id") == agent_id)
+            .sort("time", descending=True)
+            .head(limit)
+        )
 
     def get_reflective_memory(self, agent_id: str, date: Optional[str] = None) -> Dict:
         """Get reflective memory for an agent, optionally for a specific date"""

@@ -100,7 +100,7 @@ def test_memory_record_action():
     )
 
     assert node_id is not None
-    
+
     # Force flush the buffer to check the DataFrame
     memory._flush_buffer()
     assert len(memory.temporal_memory) == 1
@@ -118,7 +118,7 @@ def test_memory_buffer():
     agent = Agent(agent_id="test_agent")
     poi = POI(poi_id="test_poi", location=[10.0, 20.0])
     time = datetime.now()
-    
+
     # Record multiple actions without exceeding buffer limit
     for i in range(10):
         memory.record_action(
@@ -127,14 +127,14 @@ def test_memory_buffer():
             poi=poi,
             activity_key=f"activity_{i}",
         )
-    
+
     # Buffer should have records, but DataFrame should be empty
     assert len(memory._temporal_memory_buffer) == 10
     assert len(memory.temporal_memory) == 0
-    
+
     # Force flush the buffer
     memory._flush_buffer()
-    
+
     # Buffer should be empty, DataFrame should have records
     assert len(memory._temporal_memory_buffer) == 0
     assert len(memory.temporal_memory) == 10
@@ -209,7 +209,7 @@ def test_simulation_basic_flow():
     assert "day" in step_stats
     assert "agent_actions" in step_stats
     assert len(step_stats["agent_actions"]) == 1  # One agent
-    
+
     # Force flush memory buffer to check DataFrame
     sim.memory._flush_buffer()
     # Check temporal memory has a record
