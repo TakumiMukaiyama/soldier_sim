@@ -31,7 +31,7 @@ Built with Polars for high-performance data processing, Pydantic for data valida
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/city-sim.git
+git clone https://github.com/TakumiMukaiyama/city_sim.git
 cd city-sim
 
 # Install dependencies
@@ -135,6 +135,3 @@ The simulation generates various output files:
 - `temporal_memory.parquet`: Time-based memories (Polars DataFrame)
 - `reflective_memory.json`: Processed insights
 
-## License
-
-MIT
