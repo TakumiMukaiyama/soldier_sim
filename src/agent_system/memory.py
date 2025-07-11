@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
 from uuid import uuid4
 
 import polars as pl
@@ -35,24 +35,25 @@ class Memory:
                 "current_weapon_strength": pl.Float64,
                 "current_hunger": pl.Float64,
                 "current_management_skill": pl.Float64,
+                "current_sociability": pl.Float64,
             }
         )
-        
+
         # Initialize temporal memory buffer for batch processing
         self._temporal_memory_buffer: List[Dict[str, Any]] = []
-        
+
         # Reflective memory - daily summaries by agent
         self.reflective_memory = {}  # agent_id -> date -> summary_dict
-    
+
     def _flush_buffer(self) -> None:
         """Flush the buffer to the temporal memory DataFrame"""
         if not self._temporal_memory_buffer:
             return
-            
+
         # Create DataFrame from buffer and concat with existing memory
         buffer_df = pl.DataFrame(self._temporal_memory_buffer)
         self.temporal_memory = pl.concat([self.temporal_memory, buffer_df])
-        
+
         # Clear buffer
         self._temporal_memory_buffer = []
 
@@ -66,14 +67,14 @@ class Memory:
     ) -> str:
         """
         Record an agent action to temporal memory
-        
+
         Args:
             agent: Agent performing the action
             time: Timestamp of the action
             poi: POI where action occurred (or None)
             activity_key: Type of activity (e.g., "train", "eat", "rest")
             observation: Observation data from this action
-            
+
         Returns:
             ID of the created memory node
         """
@@ -106,11 +107,12 @@ class Memory:
             "current_weapon_strength": agent.weapon_strength,
             "current_hunger": agent.hunger,
             "current_management_skill": agent.management_skill,
+            "current_sociability": agent.sociability,
         }
 
         # Append to temporal memory buffer
         self._temporal_memory_buffer.append(new_record)
-        
+
         # Flush buffer if it's getting large
         if len(self._temporal_memory_buffer) >= 100:
             self._flush_buffer()
@@ -120,21 +122,19 @@ class Memory:
     def generate_daily_summary(self, agent_id: str, date: str) -> Dict[str, Any]:
         """
         Generate a reflective summary for an agent for a specific day
-        
+
         Args:
             agent_id: ID of the agent
             date: Date string in YYYY-MM-DD format
-            
+
         Returns:
             Summary dictionary for reflective memory
         """
         # Flush buffer to ensure all records are in the DataFrame
         self._flush_buffer()
-        
+
         # Filter memory for this agent on this date
-        daily_df = self.temporal_memory.filter(
-            (pl.col("agent_id") == agent_id) & (pl.col("time").str.contains(date))
-        )
+        daily_df = self.temporal_memory.filter((pl.col("agent_id") == agent_id) & (pl.col("time").str.contains(date)))
 
         if len(daily_df) == 0:
             return {"no_activity": True}
@@ -143,15 +143,8 @@ class Memory:
         summary = {
             "date": date,
             "activity_count": len(daily_df),
-            "activity_distribution": daily_df.groupby("activity_key")
-            .count()
-            .sort("count", descending=True)
-            .to_dict(),
-            "most_visited_poi": daily_df.groupby("poi_id")
-            .count()
-            .sort("count", descending=True)
-            .head(1)
-            .to_dict(),
+            "activity_distribution": daily_df.groupby("activity_key").count().sort("count", descending=True).to_dict(),
+            "most_visited_poi": daily_df.groupby("poi_id").count().sort("count", descending=True).head(1).to_dict(),
             "energy_stats": {
                 "start": daily_df["current_energy"].first(),
                 "end": daily_df["current_energy"].last(),
@@ -181,12 +174,8 @@ class Memory:
         """Get recent temporal memories for an agent"""
         # Flush buffer to ensure all records are in the DataFrame
         self._flush_buffer()
-        
-        return (
-            self.temporal_memory.filter(pl.col("agent_id") == agent_id)
-            .sort("time", descending=True)
-            .head(limit)
-        )
+
+        return self.temporal_memory.filter(pl.col("agent_id") == agent_id).sort("time", descending=True).head(limit)
 
     def get_reflective_memory(self, agent_id: str, date: Optional[str] = None) -> Dict:
         """Get reflective memory for an agent, optionally for a specific date"""
