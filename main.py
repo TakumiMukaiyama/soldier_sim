@@ -297,9 +297,10 @@ def main():
     # Override settings from command line args
     days = args.days or config["simulation"]["days"]
     steps_per_day = args.steps or config["simulation"]["time_steps_per_day"]
-    # Update agent_count priority: args -> env -> config -> default
-    agent_count = app_settings.agent_count
-    poi_count = app_settings.poi_count
+
+    # Use config settings for agent and POI counts, with command line override
+    agent_count = config["agents"]["count"]
+    poi_count = config["pois"]["count"]
 
     logger.info(f"Running simulation for {days} days with {steps_per_day} steps per day")
     if agent_count:
