@@ -9,10 +9,14 @@ import yaml
 from src.agent_system.agent import ARCHETYPES, Agent
 from src.agent_system.poi import POI
 from src.agent_system.simulation import Simulation
-from src.configs.settings import get_settings
+from src.configs.settings import app_settings
 from src.llm_app.client_azure import AzureGPTClient
 from src.llm_app.client_gemini import GeminiClient
 from src.llm_app.planner import Planner
+from src.utils.get_logger import get_logger
+
+# Initialize logger
+logger = get_logger(__name__)
 
 
 def load_config(config_path):
@@ -69,8 +73,7 @@ def load_agents(personas_path, count=None):
                         0.1,
                         min(
                             0.9,
-                            new_persona["personality"][trait]
-                            + random.uniform(-0.2, 0.2),
+                            new_persona["personality"][trait] + random.uniform(-0.2, 0.2),
                         ),
                     )
 
@@ -80,17 +83,14 @@ def load_agents(personas_path, count=None):
                         # Special handling for management_skill: keep it in 0.0-0.3 range
                         base_value = new_persona["initial_stats"][stat]
                         new_value = base_value + random.uniform(-0.1, 0.1)
-                        new_persona["initial_stats"][stat] = max(
-                            0.0, min(0.3, new_value)
-                        )
+                        new_persona["initial_stats"][stat] = max(0.0, min(0.3, new_value))
                     else:
                         # Normal randomization for other stats
                         new_persona["initial_stats"][stat] = max(
                             0.1,
                             min(
                                 0.9,
-                                new_persona["initial_stats"][stat]
-                                + random.uniform(-0.15, 0.15),
+                                new_persona["initial_stats"][stat] + random.uniform(-0.15, 0.15),
                             ),
                         )
 
@@ -111,12 +111,8 @@ def load_agents(personas_path, count=None):
             energy=persona.get("initial_stats", {}).get("energy", 1.0),
             social=persona.get("initial_stats", {}).get("social", 0.5),
             hunger=persona.get("initial_stats", {}).get("hunger", 0.0),
-            weapon_strength=persona.get("initial_stats", {}).get(
-                "weapon_strength", 0.5
-            ),
-            management_skill=persona.get("initial_stats", {}).get(
-                "management_skill", 0.3
-            ),
+            weapon_strength=persona.get("initial_stats", {}).get("weapon_strength", 0.5),
+            management_skill=persona.get("initial_stats", {}).get("management_skill", 0.3),
             sociability=persona.get("initial_stats", {}).get("sociability", 0.5),
             power=persona.get("initial_stats", {}).get("power", 0.5),
         )
@@ -196,9 +192,7 @@ def initialize_llm_client(settings, config):
             or not settings.azure_openai_endpoint
             or not settings.azure_openai_deployment_id
         ):
-            print(
-                "Warning: Azure credentials not fully configured, falling back to Gemini"
-            )
+            logger.warning("Azure credentials not fully configured, falling back to Gemini")
             provider = "gemini"
         else:
             return AzureGPTClient(
@@ -238,14 +232,12 @@ def save_results(results, output_dir):
     with open(output_path / "reflective_memory.json", "w") as f:
         json.dump(results["reflective_memory"], f, indent=2, default=str)
 
-    print(f"Results saved to {output_path}")
+    logger.info(f"Results saved to {output_path}")
     return output_path
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="City Sim - Military Multi-Agent Simulation"
-    )
+    parser = argparse.ArgumentParser(description="City Sim - Military Multi-Agent Simulation")
     parser.add_argument(
         "--config",
         type=str,
@@ -258,9 +250,7 @@ def main():
         default="data/personas.json",
         help="Path to agent personas file",
     )
-    parser.add_argument(
-        "--pois", type=str, default="data/pois.json", help="Path to POIs file"
-    )
+    parser.add_argument("--pois", type=str, default="data/pois.json", help="Path to POIs file")
     parser.add_argument(
         "--days",
         type=int,
@@ -273,12 +263,8 @@ def main():
         default=None,
         help="Number of time steps per day (overrides config)",
     )
-    parser.add_argument(
-        "--use-llm", action="store_true", help="Use LLM for agent planning"
-    )
-    parser.add_argument(
-        "--output", type=str, default="output", help="Output directory for results"
-    )
+    parser.add_argument("--use-llm", action="store_true", help="Use LLM for agent planning")
+    parser.add_argument("--output", type=str, default="output", help="Output directory for results")
     parser.add_argument(
         "--agent-count",
         type=int,
@@ -303,61 +289,59 @@ def main():
     # Set random seed if specified
     if args.seed is not None:
         random.seed(args.seed)
-        print(f"Using random seed: {args.seed}")
+        logger.info(f"Using random seed: {args.seed}")
 
     # Load settings and config
-    settings = get_settings()
     config = load_config(args.config)
 
     # Override settings from command line args
     days = args.days or config["simulation"]["days"]
     steps_per_day = args.steps or config["simulation"]["time_steps_per_day"]
-    agent_count = args.agent_count or config["agents"].get("count", None)
-    poi_count = args.poi_count or config["pois"].get("count", None)
+    # Update agent_count priority: args -> env -> config -> default
+    agent_count = app_settings.agent_count
+    poi_count = app_settings.poi_count
 
-    print(f"Running simulation for {days} days with {steps_per_day} steps per day")
+    logger.info(f"Running simulation for {days} days with {steps_per_day} steps per day")
     if agent_count:
-        print(f"Using {agent_count} agents")
+        logger.info(f"Using {agent_count} agents")
     if poi_count:
-        print(f"Using {poi_count} POIs")
+        logger.info(f"Using {poi_count} POIs")
 
     # Initialize LLM planner if requested
     planner = None
     if args.use_llm:
         try:
-            llm_client = initialize_llm_client(settings, config)
+            llm_client = initialize_llm_client(app_settings, config)
             planner = Planner(llm_client)
-            print(f"Using LLM planner with {config['llm']['default_provider']} model")
+            logger.info(f"Using LLM planner with {config['llm']['default_provider']} model")
         except Exception as e:
-            print(f"Failed to initialize LLM planner: {e}")
-            print("Continuing with rule-based planning")
+            logger.warning(f"Failed to initialize LLM planner: {e}")
+            logger.info("Continuing with rule-based planning")
 
     # Create simulation
-    simulation = Simulation(
-        days=days, time_steps_per_day=steps_per_day, planner=planner
-    )
+    simulation = Simulation(days=days, time_steps_per_day=steps_per_day, planner=planner)
 
     # Load and add agents
     agents = load_agents(args.agents, count=agent_count)
-    print(f"Loaded {len(agents)} agents")
+    logger.info(f"Loaded {len(agents)} agents")
     for agent in agents:
         simulation.add_agent(agent)
 
     # Load and add POIs
     pois = load_pois(args.pois, count=poi_count)
-    print(f"Loaded {len(pois)} POIs")
+    logger.info(f"Loaded {len(pois)} POIs")
     for poi in pois:
         simulation.add_poi(poi)
 
     # Run simulation
-    print("Starting simulation...")
+    logger.info("Starting simulation...")
     results = simulation.run()
 
     # Save results
     output_path = save_results(results, args.output)
 
-    print(f"Simulation completed. {results['days_completed']} days simulated.")
-    print(f"Results saved to {output_path}")
+    logger.info(f"Simulation completed. {results['days_completed']} days simulated.")
+    logger.info(f"Results saved to {output_path}")
 
 
 if __name__ == "__main__":

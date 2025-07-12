@@ -2,7 +2,7 @@ from typing import Any, Dict, List
 
 from langchain.prompts import PromptTemplate
 
-from .schemas import PlanOutput
+from src.llm_app.schemas import PlanOutput
 
 
 class PydanticChain:

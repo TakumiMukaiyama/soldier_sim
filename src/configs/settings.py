@@ -23,10 +23,10 @@ class AppSettings(BaseSettings):
     langsmith_project: Optional[str] = None
 
     # Simulation Settings
-    simulation_days: int = 100
-    poi_count: int = 100
-    agent_count: int = 100
-    time_steps_per_day: int = 8
+    simulation_days: int
+    poi_count: int
+    agent_count: int
+    time_steps_per_day: int
 
     # Data Paths
     config_path: str = "configs/default.yaml"
@@ -36,7 +36,4 @@ class AppSettings(BaseSettings):
     # Configure loading from .env file
     model_config = SettingsConfigDict(env_file=".env", env_nested_delimiter="__")
 
-
-def get_settings():
-    """Get application settings from environment variables or .env file"""
-    return AppSettings()
+app_settings = AppSettings()
