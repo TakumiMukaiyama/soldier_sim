@@ -22,12 +22,6 @@ class AppSettings(BaseSettings):
     langsmith_api_key: Optional[str] = None
     langsmith_project: Optional[str] = None
 
-    # Simulation Settings
-    simulation_days: int
-    poi_count: int
-    agent_count: int
-    time_steps_per_day: int
-
     # Data Paths
     config_path: str = "configs/default.yaml"
     personas_path: str = "data/personas.json"
@@ -35,5 +29,6 @@ class AppSettings(BaseSettings):
 
     # Configure loading from .env file
     model_config = SettingsConfigDict(env_file=".env", env_nested_delimiter="__")
+
 
 app_settings = AppSettings()
