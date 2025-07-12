@@ -33,7 +33,7 @@ def aggregate_daily_energy(memory_df: pl.DataFrame, agent_id: Optional[str] = No
     filtered_df = filtered_df.with_columns(pl.col("time").str.slice(0, 10).alias("date"))
 
     # Group by date and get energy stats
-    result = filtered_df.groupby("date").agg(
+    result = filtered_df.group_by("date").agg(
         pl.min("current_energy").alias("min_energy"),
         pl.mean("current_energy").alias("avg_energy"),
         pl.max("current_energy").alias("max_energy"),
@@ -56,7 +56,7 @@ def aggregate_daily_stats(memory_df: pl.DataFrame) -> pl.DataFrame:
     )
 
     # Group by date and agent_id, then aggregate
-    daily_stats = df.groupby(["date", "agent_id"]).agg(
+    daily_stats = df.group_by(["date", "agent_id"]).agg(
         [
             pl.col("current_energy").mean().alias("avg_energy"),
             pl.col("current_energy").max().alias("max_energy"),
@@ -67,7 +67,7 @@ def aggregate_daily_stats(memory_df: pl.DataFrame) -> pl.DataFrame:
             pl.col("current_management_skill").mean().alias("avg_management_skill"),
             pl.col("current_sociability").mean().alias("avg_sociability"),
             pl.col("current_power").mean().alias("avg_power"),
-            pl.col("poi_id").count().alias("total_actions"),
+            pl.col("poi_id").len().alias("total_actions"),
         ]
     )
 
@@ -83,9 +83,9 @@ def poi_visit_stats(memory_df: pl.DataFrame) -> pl.DataFrame:
     """
     return (
         memory_df.filter(pl.col("poi_id").is_not_null())
-        .groupby("poi_id")
+        .group_by("poi_id")
         .agg(
-            pl.count().alias("visit_count"),
+            pl.len().alias("visit_count"),
             pl.n_unique("agent_id").alias("unique_agents"),
         )
         .sort("visit_count", descending=True)
@@ -523,10 +523,10 @@ def create_poi_heatmap(memory_df: pl.DataFrame, pois_metadata: Dict[str, Dict]) 
     # Count visits by hour and category
     heatmap_data = (
         df.filter(pl.col("poi_id").is_not_null())
-        .groupby(["hour", "category"])
-        .count()
+        .group_by(["hour", "category"])
+        .len()
         .pivot(
-            values="count",
+            values="len",
             index="hour",
             columns="category",
         )

@@ -147,13 +147,13 @@ class Memory:
         summary = {
             "date": date,
             "activity_count": len(daily_df),
-            "activity_distribution": daily_df.groupby("activity_key")
-            .count()
-            .sort("count", descending=True)
+            "activity_distribution": daily_df.group_by("activity_key")
+            .len()
+            .sort("len", descending=True)
             .to_dict(),
-            "most_visited_poi": daily_df.groupby("poi_id")
-            .count()
-            .sort("count", descending=True)
+            "most_visited_poi": daily_df.group_by("poi_id")
+            .len()
+            .sort("len", descending=True)
             .head(1)
             .to_dict(),
             "energy_stats": {
