@@ -2,16 +2,24 @@
 
 # Simulation parameters
 simulation:
-  days: 20
+  days: 7
   time_steps_per_day: 8
   start_hour: 6  # Simulation starts at 6am
 
 # Agent parameters
 agents:
-  count: 50
+  count: 10
   energy_decay_rate: 0.05  # Energy decrease per time step
   hunger_increase_rate: 0.08  # Hunger increase per time step
   social_need_base_rate: 0.03  # Base social need increase rate
+  # Archetype distribution - probabilities for agent type selection
+  archetype_distribution:
+    weapon_specialist: 0.25
+    natural_leader: 0.15
+    social_butterfly: 0.15
+    scholar: 0.15
+    fitness_enthusiast: 0.2
+    introvert: 0.1
   
 # POI parameters
 pois:

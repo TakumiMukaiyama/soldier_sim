@@ -25,13 +25,24 @@ def load_config(config_path):
         return yaml.safe_load(f)
 
 
-def load_agents(personas_path, count=None):
-    """Load agent personas from JSON file"""
+def load_agents(personas_path, count=None, config=None):
+    """Load agent personas from JSON file with configurable archetype distribution"""
     with open(personas_path, "r") as f:
         data = json.load(f)
 
     # Get list of available archetypes
     available_archetypes = list(ARCHETYPES.keys())
+    
+    # Get archetype distribution from config or use equal distribution
+    archetype_weights = None
+    if config and "agents" in config and "archetype_distribution" in config["agents"]:
+        archetype_dist = config["agents"]["archetype_distribution"]
+        archetype_weights = [archetype_dist.get(arch, 1.0) for arch in available_archetypes]
+        logger.info(f"Using configured archetype distribution: {dict(zip(available_archetypes, archetype_weights))}")
+    else:
+        # Default to equal weights if no distribution is configured
+        archetype_weights = [1.0] * len(available_archetypes)
+        logger.info("Using equal archetype distribution (no configuration found)")
 
     # If a specific count is requested, handle it
     if count is not None:
@@ -51,21 +62,15 @@ def load_agents(personas_path, count=None):
                 # Randomize some attributes
                 new_persona["age"] = random.randint(19, 40)
 
-                # Determine rank based on age and random factor
-                ranks = ["private", "corporal", "sergeant", "lieutenant", "captain"]
-                rank_weights = [0.5, 0.25, 0.15, 0.07, 0.03]  # More lower ranks
-                if new_persona["age"] > 30:
-                    rank_weights = [
-                        0.2,
-                        0.3,
-                        0.3,
-                        0.15,
-                        0.05,
-                    ]  # More higher ranks for older agents
-                new_persona["rank"] = random.choices(ranks, weights=rank_weights)[0]
+                # Assign fixed rank (removing rank selection logic)
+                new_persona["rank"] = "private"
 
-                # Assign random archetype
-                new_persona["archetype"] = random.choice(available_archetypes)
+                # Assign archetype based on configured weights
+                new_persona["archetype"] = random.choices(
+                    available_archetypes,
+                    weights=archetype_weights,
+                    k=1
+                )[0]
 
                 # Randomize personality slightly
                 for trait in new_persona["personality"]:
@@ -103,15 +108,20 @@ def load_agents(personas_path, count=None):
 
     agents = []
     for persona in data:
-        # Assign archetype if not already present
-        archetype = persona.get("archetype", random.choice(available_archetypes))
+        # Assign archetype if not already present, using configured weights
+        if "archetype" not in persona:
+            persona["archetype"] = random.choices(
+                available_archetypes,
+                weights=archetype_weights,
+                k=1
+            )[0]
 
         agent = Agent(
             agent_id=persona.get("id"),
             age=persona.get("age", 30),
             personality=persona.get("personality", {}),
             rank=persona.get("rank", "private"),
-            archetype=archetype,
+            archetype=persona.get("archetype"),
             energy=persona.get("initial_stats", {}).get("energy", 1.0),
             social=persona.get("initial_stats", {}).get("social", 0.5),
             hunger=persona.get("initial_stats", {}).get("hunger", 0.0),
@@ -347,7 +357,7 @@ def main():
     )
 
     # Load and add agents
-    agents = load_agents(args.agents, count=agent_count)
+    agents = load_agents(args.agents, count=agent_count, config=config)
     logger.info(f"Loaded {len(agents)} agents")
     for agent in agents:
         simulation.add_agent(agent)
