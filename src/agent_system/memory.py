@@ -4,8 +4,8 @@ from uuid import uuid4
 
 import polars as pl
 
-from .agent import Agent
-from .poi import POI
+from src.agent_system.agent import Agent
+from src.agent_system.poi import POI
 
 
 class Memory:

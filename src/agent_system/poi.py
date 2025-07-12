@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 from uuid import uuid4
 
-from .kalman import kalman_update
+from src.agent_system.kalman import kalman_update
 
 
 class POI:
