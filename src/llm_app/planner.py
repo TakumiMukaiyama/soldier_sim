@@ -39,23 +39,27 @@ class PydanticChain:
         Returns:
             Instance of the output model
         """
-        # Format prompt with input values
-        prompt_value = self.prompt.format(**input_values)
+        try:
+            # Format prompt with input values
+            prompt_value = self.prompt.format(**input_values)
 
-        # Get JSON example for output model
-        json_schema = self.output_model.model_json_schema()
-        example = self._generate_example_from_schema(json_schema)
+            # Get JSON example for output model
+            json_schema = self.output_model.model_json_schema()
+            example = self._generate_example_from_schema(json_schema)
 
-        # Invoke LLM with structured output instructions
-        system_prompt = "You are an AI planner for a military simulation. Generate a plan for the agent based on their state, memory, and available POIs."
-        result = self.llm.invoke_with_structured_output(
-            system_prompt=system_prompt,
-            user_prompt=prompt_value,
-            json_structure=example,
-        )
+            # Invoke LLM with structured output instructions
+            system_prompt = "You are an AI planner for a military simulation. Generate a plan for the agent based on their state, memory, and available POIs. Respond ONLY with valid JSON, no additional text."
+            result = self.llm.invoke_with_structured_output(
+                system_prompt=system_prompt,
+                user_prompt=prompt_value,
+                json_structure=example,
+            )
 
-        # Parse and validate with Pydantic model
-        return self.output_model(**result)
+            # Parse and validate with Pydantic model
+            return self.output_model(**result)
+        except Exception as e:
+            # Re-raise with more specific error information
+            raise ValueError(f"Failed to generate plan: {str(e)}")
 
     def _generate_example_from_schema(self, schema: Dict[str, Any]) -> Dict[str, Any]:
         """Generate an example dictionary from a JSON schema"""
@@ -98,9 +102,7 @@ class Planner:
         Args:
             llm_client: LLM client to use (Gemini or Azure)
         """
-        self.chain = PydanticChain(
-            llm=llm_client, output_model=PlanOutput, prompt=self._build_prompt()
-        )
+        self.chain = PydanticChain(llm=llm_client, output_model=PlanOutput, prompt=self._build_prompt())
 
     def _build_prompt(self) -> str:
         """Build the prompt template for the planner"""
@@ -118,18 +120,22 @@ Available POIs:
 
 Based on this information, determine:
 1. Which POI the agent should visit next
-2. What activity they should perform there
+2. What activity they should perform there  
 3. How long they should spend (in hours, 1-8)
 4. Why this is the optimal choice given their current state and needs
 
-Return your decision in this exact JSON format:
-{
-  "agent_id": "the agent's ID",
-  "chosen_poi": "ID of the chosen POI",
-  "activity": "train/eat/rest/manage/arm",
+IMPORTANT: You must respond with ONLY valid JSON, no additional text or explanation outside the JSON.
+
+Available activities: train, eat, rest, manage, arm, socialize, heal, exercise, study, craft, communicate, maintain, outdoor_train, reflect, organize, idle
+
+JSON response format:
+{{
+  "agent_id": "extract from agent state",
+  "chosen_poi": "select POI ID from available list",
+  "activity": "select one activity from available activities",
   "expected_duration": 2,
-  "reason": "Brief explanation of why this is the optimal choice"
-}
+  "reason": "Brief explanation of choice"
+}}
 """
 
     def plan_action(
