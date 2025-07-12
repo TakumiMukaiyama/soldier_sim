@@ -45,6 +45,7 @@ class POI:
             "social": 0.0,
             "weapon_strength": 0.0,
             "management_skill": 0.0,
+            "power": 0.0,
         }
 
     def update_belief(

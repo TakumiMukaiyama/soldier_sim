@@ -36,6 +36,7 @@ class Memory:
                 "current_hunger": pl.Float64,
                 "current_management_skill": pl.Float64,
                 "current_sociability": pl.Float64,
+                "current_power": pl.Float64,
             }
         )
 
@@ -108,6 +109,7 @@ class Memory:
             "current_hunger": agent.hunger,
             "current_management_skill": agent.management_skill,
             "current_sociability": agent.sociability,
+            "current_power": agent.power,
         }
 
         # Append to temporal memory buffer
@@ -170,6 +172,8 @@ class Memory:
             - daily_df["current_weapon_strength"].first(),
             "management_skill_change": daily_df["current_management_skill"].last()
             - daily_df["current_management_skill"].first(),
+            "power_change": daily_df["current_power"].last()
+            - daily_df["current_power"].first(),
         }
 
         # Store in reflective memory
