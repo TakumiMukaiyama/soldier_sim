@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -13,6 +15,12 @@ class AppSettings(BaseSettings):
     # Gemini settings
     gemini_api_key: str
     gemini_model_name: str
+
+    # LangSmith settings (optional for tracing)
+    langsmith_tracing: Optional[str] = None
+    langsmith_endpoint: Optional[str] = None
+    langsmith_api_key: Optional[str] = None
+    langsmith_project: Optional[str] = None
 
     # Simulation Settings
     simulation_days: int = 100
