@@ -6,7 +6,7 @@ from pathlib import Path
 
 import yaml
 
-from src.agent_system.agent import Agent
+from src.agent_system.agent import ARCHETYPES, Agent
 from src.agent_system.poi import POI
 from src.agent_system.simulation import Simulation
 from src.configs.settings import get_settings
@@ -25,6 +25,9 @@ def load_agents(personas_path, count=None):
     """Load agent personas from JSON file"""
     with open(personas_path, "r") as f:
         data = json.load(f)
+
+    # Get list of available archetypes
+    available_archetypes = list(ARCHETYPES.keys())
 
     # If a specific count is requested, handle it
     if count is not None:
@@ -56,6 +59,9 @@ def load_agents(personas_path, count=None):
                         0.05,
                     ]  # More higher ranks for older agents
                 new_persona["rank"] = random.choices(ranks, weights=rank_weights)[0]
+
+                # Assign random archetype
+                new_persona["archetype"] = random.choice(available_archetypes)
 
                 # Randomize personality slightly
                 for trait in new_persona["personality"]:
@@ -93,11 +99,15 @@ def load_agents(personas_path, count=None):
 
     agents = []
     for persona in data:
+        # Assign archetype if not already present
+        archetype = persona.get("archetype", random.choice(available_archetypes))
+
         agent = Agent(
             agent_id=persona.get("id"),
             age=persona.get("age", 30),
             personality=persona.get("personality", {}),
             rank=persona.get("rank", "private"),
+            archetype=archetype,
             energy=persona.get("initial_stats", {}).get("energy", 1.0),
             social=persona.get("initial_stats", {}).get("social", 0.5),
             hunger=persona.get("initial_stats", {}).get("hunger", 0.0),
@@ -108,6 +118,7 @@ def load_agents(personas_path, count=None):
                 "management_skill", 0.3
             ),
             sociability=persona.get("initial_stats", {}).get("sociability", 0.5),
+            power=persona.get("initial_stats", {}).get("power", 0.5),
         )
         agents.append(agent)
 
@@ -181,9 +192,9 @@ def initialize_llm_client(settings, config):
 
     if provider == "azure":
         if (
-            not settings.azure_api_key
-            or not settings.azure_endpoint
-            or not settings.azure_deployment
+            not settings.azure_openai_api_key
+            or not settings.azure_openai_endpoint
+            or not settings.azure_openai_deployment_id
         ):
             print(
                 "Warning: Azure credentials not fully configured, falling back to Gemini"
@@ -191,22 +202,18 @@ def initialize_llm_client(settings, config):
             provider = "gemini"
         else:
             return AzureGPTClient(
-                api_key=settings.azure_api_key.get_secret_value()
-                if settings.azure_api_key
-                else None,
-                azure_endpoint=settings.azure_endpoint,
-                azure_deployment=settings.azure_deployment,
-                api_version=settings.azure_api_version,
+                api_key=settings.azure_openai_api_key,
+                azure_endpoint=settings.azure_openai_endpoint,
+                azure_deployment=settings.azure_openai_deployment_id,
+                api_version=settings.azure_openai_api_version,
             )
 
     if provider == "gemini":
         if not settings.gemini_api_key:
             raise ValueError("Gemini API key not configured in settings")
         return GeminiClient(
-            api_key=settings.gemini_api_key.get_secret_value()
-            if settings.gemini_api_key
-            else None,
-            model_name=settings.gemini_model,
+            api_key=settings.gemini_api_key,
+            model_name=settings.gemini_model_name,
         )
 
     raise ValueError(f"Unsupported LLM provider: {provider}")

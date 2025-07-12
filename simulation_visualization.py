@@ -69,9 +69,19 @@ def load_and_process_data(log_dir):
     df["parsed_observation"] = df["observation"].apply(parse_observation)
 
     # Extract specific observation fields
-    observation_fields = ["energy", "social", "weapon_strength", "hunger", "management_skill", "sociability"]
+    observation_fields = [
+        "energy",
+        "social",
+        "weapon_strength",
+        "hunger",
+        "management_skill",
+        "sociability",
+        "power",
+    ]
     for field in observation_fields:
-        df[f"obs_{field}"] = df["parsed_observation"].apply(lambda x: x.get(field, np.nan))
+        df[f"obs_{field}"] = df["parsed_observation"].apply(
+            lambda x: x.get(field, np.nan)
+        )
 
     # Convert time to datetime
     df["time"] = pd.to_datetime(df["time"])
@@ -90,8 +100,13 @@ def visualize_skill_progression(df, save_dir):
     print("Creating skill progression analysis...")
 
     # Skill columns to analyze
-    skill_columns = ["current_weapon_strength", "current_management_skill", "current_sociability"]
-    skill_names = ["Weapon Strength", "Management Skill", "Sociability"]
+    skill_columns = [
+        "current_weapon_strength",
+        "current_management_skill",
+        "current_sociability",
+        "current_power",
+    ]
+    skill_names = ["Weapon Strength", "Management Skill", "Sociability", "Power"]
 
     # Create figure with subplots (reduced DPI for smaller file size)
     fig, axes = plt.subplots(2, 2, figsize=(14, 10), dpi=80)
@@ -102,7 +117,9 @@ def visualize_skill_progression(df, save_dir):
     daily_skills = df.groupby(df["time"].dt.date)[skill_columns].mean()
 
     for i, (col, name) in enumerate(zip(skill_columns, skill_names)):
-        ax1.plot(daily_skills.index, daily_skills[col], label=name, linewidth=2, alpha=0.8)
+        ax1.plot(
+            daily_skills.index, daily_skills[col], label=name, linewidth=2, alpha=0.8
+        )
 
     ax1.set_title("Average Skill Progression Over Time", fontweight="bold")
     ax1.set_xlabel("Date")
@@ -118,7 +135,7 @@ def visualize_skill_progression(df, save_dir):
 
     top_agent_data = final_skills.loc[top_agents.index]
     x_pos = np.arange(len(top_agent_data))
-    width = 0.25
+    width = 0.2  # Adjusted for 4 skills
 
     for i, (col, name) in enumerate(zip(skill_columns, skill_names)):
         ax2.bar(x_pos + i * width, top_agent_data[col], width, label=name, alpha=0.8)
@@ -126,7 +143,7 @@ def visualize_skill_progression(df, save_dir):
     ax2.set_title("Top 10 Agents - Final Skills", fontweight="bold")
     ax2.set_xlabel("Agent ID")
     ax2.set_ylabel("Skill Level")
-    ax2.set_xticks(x_pos + width)
+    ax2.set_xticks(x_pos + width * 1.5)  # Center the labels for 4 bars
     ax2.set_xticklabels([f"Agent {i}" for i in range(len(top_agent_data))], rotation=45)
     ax2.legend()
     ax2.grid(True, alpha=0.3)
@@ -136,7 +153,7 @@ def visualize_skill_progression(df, save_dir):
     start_skills = df.groupby("agent_id")[skill_columns].first()
     end_skills = df.groupby("agent_id")[skill_columns].last()
 
-    positions = [1, 2, 4, 5, 7, 8]
+    positions = [1, 2, 4, 5, 7, 8, 10, 11]  # Extended for 4 skills
     labels = []
     data_to_plot = []
 
@@ -147,7 +164,7 @@ def visualize_skill_progression(df, save_dir):
     box_plot = ax3.boxplot(data_to_plot, positions=positions, patch_artist=True)
 
     # Color the boxes
-    colors = ["lightblue", "lightcoral"] * 3
+    colors = ["lightblue", "lightcoral"] * 4  # Extended for 4 skills
     for patch, color in zip(box_plot["boxes"], colors):
         patch.set_facecolor(color)
 
@@ -161,7 +178,15 @@ def visualize_skill_progression(df, save_dir):
     ax4 = axes[1, 1]
     correlation_data = df[skill_columns].corr()
 
-    sns.heatmap(correlation_data, annot=True, cmap="coolwarm", center=0, square=True, ax=ax4, cbar_kws={"shrink": 0.8})
+    sns.heatmap(
+        correlation_data,
+        annot=True,
+        cmap="coolwarm",
+        center=0,
+        square=True,
+        ax=ax4,
+        cbar_kws={"shrink": 0.8},
+    )
     ax4.set_title("Skill Correlation Matrix", fontweight="bold")
     ax4.set_xticklabels(skill_names, rotation=45)
     ax4.set_yticklabels(skill_names, rotation=0)
@@ -221,7 +246,9 @@ def visualize_poi_usage(df, save_dir):
     df["hour"] = df["time"].dt.hour
     hourly_poi = df.groupby(["hour", "poi_id"]).size().unstack(fill_value=0)
 
-    hourly_poi.plot(kind="bar", stacked=True, ax=ax2, color=colors[: len(hourly_poi.columns)])
+    hourly_poi.plot(
+        kind="bar", stacked=True, ax=ax2, color=colors[: len(hourly_poi.columns)]
+    )
     ax2.set_title("Hourly POI Usage Patterns", fontweight="bold")
     ax2.set_xlabel("Hour of Day")
     ax2.set_ylabel("Number of Visits")
@@ -230,10 +257,18 @@ def visualize_poi_usage(df, save_dir):
 
     # 3. POI efficiency (visits per agent per day)
     ax3 = axes[1, 0]
-    daily_poi_usage = df.groupby([df["time"].dt.date, "poi_id", "agent_id"]).size().reset_index(name="visits")
+    daily_poi_usage = (
+        df.groupby([df["time"].dt.date, "poi_id", "agent_id"])
+        .size()
+        .reset_index(name="visits")
+    )
     poi_efficiency = daily_poi_usage.groupby("poi_id")["visits"].mean()
 
-    bars = ax3.bar(range(len(poi_efficiency)), poi_efficiency.values, color=colors[: len(poi_efficiency)])
+    bars = ax3.bar(
+        range(len(poi_efficiency)),
+        poi_efficiency.values,
+        color=colors[: len(poi_efficiency)],
+    )
     ax3.set_title("Average Visits per Agent per Day by POI", fontweight="bold")
     ax3.set_xlabel("POI")
     ax3.set_ylabel("Avg Visits per Agent per Day")
@@ -316,13 +351,25 @@ def create_agent_movement_animation(df, save_dir):
 
         # Plot POI locations
         for poi, location in poi_locations.iterrows():
-            ax.scatter(location["x"], location["y"], s=200, alpha=0.7, label=poi, marker="s")
+            ax.scatter(
+                location["x"], location["y"], s=200, alpha=0.7, label=poi, marker="s"
+            )
 
         # Plot agent locations
         if len(current_data) > 0:
-            ax.scatter(current_data["x"], current_data["y"], c="red", s=30, alpha=0.6, label="Agents")
+            ax.scatter(
+                current_data["x"],
+                current_data["y"],
+                c="red",
+                s=30,
+                alpha=0.6,
+                label="Agents",
+            )
 
-        ax.set_title(f"Agent Movement - {current_time.strftime('%Y-%m-%d %H:%M')}", fontweight="bold")
+        ax.set_title(
+            f"Agent Movement - {current_time.strftime('%Y-%m-%d %H:%M')}",
+            fontweight="bold",
+        )
         ax.set_xlabel("X Coordinate")
         ax.set_ylabel("Y Coordinate")
         ax.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
@@ -334,7 +381,9 @@ def create_agent_movement_animation(df, save_dir):
         ax.set_ylim(df_with_coords["y"].min() - 1, df_with_coords["y"].max() + 1)
 
     # Create animation with reduced parameters for smaller file size
-    anim = FuncAnimation(fig, animate, frames=len(unique_times), interval=500, repeat=True, blit=False)
+    anim = FuncAnimation(
+        fig, animate, frames=len(unique_times), interval=500, repeat=True, blit=False
+    )
 
     # Save as GIF with optimization
     output_file = save_dir / "agent_movement.gif"
@@ -348,7 +397,9 @@ def create_agent_movement_animation(df, save_dir):
 def main():
     """Main function to run all visualizations."""
     # Setup argument parser
-    parser = argparse.ArgumentParser(description="Generate simulation visualizations for tech blog")
+    parser = argparse.ArgumentParser(
+        description="Generate simulation visualizations for tech blog"
+    )
     parser.add_argument(
         "--log-dir",
         type=str,
