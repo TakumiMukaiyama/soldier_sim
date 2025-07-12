@@ -102,7 +102,9 @@ class Planner:
         Args:
             llm_client: LLM client to use (Gemini or Azure)
         """
-        self.chain = PydanticChain(llm=llm_client, output_model=PlanOutput, prompt=self._build_prompt())
+        self.chain = PydanticChain(
+            llm=llm_client, output_model=PlanOutput, prompt=self._build_prompt()
+        )
 
     def _build_prompt(self) -> str:
         """Build the prompt template for the planner"""

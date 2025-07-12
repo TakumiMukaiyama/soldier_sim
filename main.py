@@ -73,7 +73,8 @@ def load_agents(personas_path, count=None):
                         0.1,
                         min(
                             0.9,
-                            new_persona["personality"][trait] + random.uniform(-0.2, 0.2),
+                            new_persona["personality"][trait]
+                            + random.uniform(-0.2, 0.2),
                         ),
                     )
 
@@ -83,14 +84,17 @@ def load_agents(personas_path, count=None):
                         # Special handling for management_skill: keep it in 0.0-0.3 range
                         base_value = new_persona["initial_stats"][stat]
                         new_value = base_value + random.uniform(-0.1, 0.1)
-                        new_persona["initial_stats"][stat] = max(0.0, min(0.3, new_value))
+                        new_persona["initial_stats"][stat] = max(
+                            0.0, min(0.3, new_value)
+                        )
                     else:
                         # Normal randomization for other stats
                         new_persona["initial_stats"][stat] = max(
                             0.1,
                             min(
                                 0.9,
-                                new_persona["initial_stats"][stat] + random.uniform(-0.15, 0.15),
+                                new_persona["initial_stats"][stat]
+                                + random.uniform(-0.15, 0.15),
                             ),
                         )
 
@@ -111,8 +115,12 @@ def load_agents(personas_path, count=None):
             energy=persona.get("initial_stats", {}).get("energy", 1.0),
             social=persona.get("initial_stats", {}).get("social", 0.5),
             hunger=persona.get("initial_stats", {}).get("hunger", 0.0),
-            weapon_strength=persona.get("initial_stats", {}).get("weapon_strength", 0.5),
-            management_skill=persona.get("initial_stats", {}).get("management_skill", 0.3),
+            weapon_strength=persona.get("initial_stats", {}).get(
+                "weapon_strength", 0.5
+            ),
+            management_skill=persona.get("initial_stats", {}).get(
+                "management_skill", 0.3
+            ),
             sociability=persona.get("initial_stats", {}).get("sociability", 0.5),
             power=persona.get("initial_stats", {}).get("power", 0.5),
         )
@@ -134,15 +142,15 @@ def load_pois(pois_path, count=None):
         else:
             # If we need more POIs than available, clone and modify existing ones
             original_count = len(data)
-            categories = ["training", "food", "rest", "office", "armory", "recreation"]
+            categories = list(set([poi["category"] for poi in data]))
 
             for i in range(original_count, count):
                 # Clone a random POI
                 new_poi = random.choice(data).copy()
 
                 # Modify the cloned POI to make it unique
-                new_poi["id"] = f"{new_poi['category']}_{i + 1}"
-                new_poi["name"] = f"{new_poi['category'].title()} Area {i + 1}"
+                new_poi["id"] = f"{random.choice(categories)}_{i + 1}"
+                new_poi["name"] = f"{random.choice(categories).title()} Area {i + 1}"
 
                 # Randomize location
                 new_poi["location"] = [random.uniform(0, 50), random.uniform(0, 50)]
@@ -192,7 +200,9 @@ def initialize_llm_client(settings, config):
             or not settings.azure_openai_endpoint
             or not settings.azure_openai_deployment_id
         ):
-            logger.warning("Azure credentials not fully configured, falling back to Gemini")
+            logger.warning(
+                "Azure credentials not fully configured, falling back to Gemini"
+            )
             provider = "gemini"
         else:
             return AzureGPTClient(
@@ -237,7 +247,9 @@ def save_results(results, output_dir):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="City Sim - Military Multi-Agent Simulation")
+    parser = argparse.ArgumentParser(
+        description="City Sim - Military Multi-Agent Simulation"
+    )
     parser.add_argument(
         "--config",
         type=str,
@@ -250,7 +262,9 @@ def main():
         default="data/personas.json",
         help="Path to agent personas file",
     )
-    parser.add_argument("--pois", type=str, default="data/pois.json", help="Path to POIs file")
+    parser.add_argument(
+        "--pois", type=str, default="data/pois.json", help="Path to POIs file"
+    )
     parser.add_argument(
         "--days",
         type=int,
@@ -263,8 +277,12 @@ def main():
         default=None,
         help="Number of time steps per day (overrides config)",
     )
-    parser.add_argument("--use-llm", action="store_true", help="Use LLM for agent planning")
-    parser.add_argument("--output", type=str, default="output", help="Output directory for results")
+    parser.add_argument(
+        "--use-llm", action="store_true", help="Use LLM for agent planning"
+    )
+    parser.add_argument(
+        "--output", type=str, default="output", help="Output directory for results"
+    )
     parser.add_argument(
         "--agent-count",
         type=int,
@@ -302,7 +320,9 @@ def main():
     agent_count = config["agents"]["count"]
     poi_count = config["pois"]["count"]
 
-    logger.info(f"Running simulation for {days} days with {steps_per_day} steps per day")
+    logger.info(
+        f"Running simulation for {days} days with {steps_per_day} steps per day"
+    )
     if agent_count:
         logger.info(f"Using {agent_count} agents")
     if poi_count:
@@ -314,13 +334,17 @@ def main():
         try:
             llm_client = initialize_llm_client(app_settings, config)
             planner = Planner(llm_client)
-            logger.info(f"Using LLM planner with {config['llm']['default_provider']} model")
+            logger.info(
+                f"Using LLM planner with {config['llm']['default_provider']} model"
+            )
         except Exception as e:
             logger.warning(f"Failed to initialize LLM planner: {e}")
             logger.info("Continuing with rule-based planning")
 
     # Create simulation
-    simulation = Simulation(days=days, time_steps_per_day=steps_per_day, planner=planner)
+    simulation = Simulation(
+        days=days, time_steps_per_day=steps_per_day, planner=planner
+    )
 
     # Load and add agents
     agents = load_agents(args.agents, count=agent_count)

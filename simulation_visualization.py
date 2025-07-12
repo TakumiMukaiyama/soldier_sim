@@ -51,7 +51,8 @@ def load_and_process_data(log_dir):
                 return float(location_array[0]), float(location_array[1])
             else:
                 return None, None
-        except:
+        except Exception as e:
+            logger.error(f"Error parsing location: {e}")
             return None, None
 
     # Parse locations
@@ -67,7 +68,8 @@ def load_and_process_data(log_dir):
             # Convert string representation to dictionary
             obs_dict = ast.literal_eval(obs_str)
             return obs_dict
-        except:
+        except Exception as e:
+            logger.error(f"Error parsing observation: {e}")
             return {}
 
     # Parse observations
@@ -84,7 +86,9 @@ def load_and_process_data(log_dir):
         "power",
     ]
     for field in observation_fields:
-        df[f"obs_{field}"] = df["parsed_observation"].apply(lambda x: x.get(field, np.nan))
+        df[f"obs_{field}"] = df["parsed_observation"].apply(
+            lambda x: x.get(field, np.nan)
+        )
 
     # Convert time to datetime
     df["time"] = pd.to_datetime(df["time"])
@@ -118,7 +122,9 @@ def visualize_skill_progression(df, save_dir):
     daily_skills = df.groupby(df["time"].dt.date)[skill_columns].mean()
 
     for i, (col, name) in enumerate(zip(skill_columns, skill_names)):
-        plt.plot(daily_skills.index, daily_skills[col], label=name, linewidth=2, alpha=0.8)
+        plt.plot(
+            daily_skills.index, daily_skills[col], label=name, linewidth=2, alpha=0.8
+        )
 
     plt.title("Average Skill Progression Over Time", fontweight="bold", fontsize=14)
     plt.xlabel("Date")
@@ -148,7 +154,11 @@ def visualize_skill_progression(df, save_dir):
     plt.title("Top 10 Agents - Final Skills", fontweight="bold", fontsize=14)
     plt.xlabel("Agent ID")
     plt.ylabel("Skill Level")
-    plt.xticks(x_pos + width * 1.5, [f"Agent {i}" for i in range(len(top_agent_data))], rotation=45)
+    plt.xticks(
+        x_pos + width * 1.5,
+        [f"Agent {i}" for i in range(len(top_agent_data))],
+        rotation=45,
+    )
     plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
     plt.grid(True, alpha=0.3)
 
@@ -186,7 +196,10 @@ def visualize_skill_progression(df, save_dir):
     # Add legend for box colors
     from matplotlib.patches import Patch
 
-    legend_elements = [Patch(facecolor="lightblue", label="Start"), Patch(facecolor="lightcoral", label="End")]
+    legend_elements = [
+        Patch(facecolor="lightblue", label="Start"),
+        Patch(facecolor="lightcoral", label="End"),
+    ]
     plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc="upper left")
 
     plt.tight_layout()
@@ -264,7 +277,8 @@ def visualize_poi_usage(df, save_dir):
 
     # Create legend for POI colors
     legend_elements = [
-        plt.Rectangle((0, 0), 1, 1, facecolor=colors[i], label=poi) for i, poi in enumerate(poi_counts.index)
+        plt.Rectangle((0, 0), 1, 1, facecolor=colors[i], label=poi)
+        for i, poi in enumerate(poi_counts.index)
     ]
     plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc="upper left")
 
@@ -294,7 +308,11 @@ def visualize_poi_usage(df, save_dir):
 
     # 3. POI efficiency (visits per agent per day)
     plt.figure(figsize=(12, 8), dpi=80)
-    daily_poi_usage = df.groupby([df["time"].dt.date, "poi_id", "agent_id"]).size().reset_index(name="visits")
+    daily_poi_usage = (
+        df.groupby([df["time"].dt.date, "poi_id", "agent_id"])
+        .size()
+        .reset_index(name="visits")
+    )
     poi_efficiency = daily_poi_usage.groupby("poi_id")["visits"].mean()
 
     bars = plt.bar(
@@ -305,7 +323,9 @@ def visualize_poi_usage(df, save_dir):
     plt.title("Average Visits per Agent per Day by POI", fontweight="bold", fontsize=14)
     plt.xlabel("POI")
     plt.ylabel("Avg Visits per Agent per Day")
-    plt.xticks(range(len(poi_efficiency)), poi_efficiency.index, rotation=45, ha="right")
+    plt.xticks(
+        range(len(poi_efficiency)), poi_efficiency.index, rotation=45, ha="right"
+    )
     plt.grid(True, alpha=0.3)
 
     # Add value labels
@@ -321,7 +341,8 @@ def visualize_poi_usage(df, save_dir):
 
     # Create legend for POI colors
     legend_elements = [
-        plt.Rectangle((0, 0), 1, 1, facecolor=colors[i], label=poi) for i, poi in enumerate(poi_efficiency.index)
+        plt.Rectangle((0, 0), 1, 1, facecolor=colors[i], label=poi)
+        for i, poi in enumerate(poi_efficiency.index)
     ]
     plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc="upper left")
 
@@ -394,7 +415,9 @@ def create_agent_movement_animation(df, save_dir):
 
         # Plot POI locations
         for poi, location in poi_locations.iterrows():
-            ax.scatter(location["x"], location["y"], s=200, alpha=0.7, label=poi, marker="s")
+            ax.scatter(
+                location["x"], location["y"], s=200, alpha=0.7, label=poi, marker="s"
+            )
 
         # Plot agent locations
         if len(current_data) > 0:
@@ -422,7 +445,9 @@ def create_agent_movement_animation(df, save_dir):
         ax.set_ylim(df_with_coords["y"].min() - 1, df_with_coords["y"].max() + 1)
 
     # Create animation with reduced parameters for smaller file size
-    anim = FuncAnimation(fig, animate, frames=len(unique_times), interval=500, repeat=True, blit=False)
+    anim = FuncAnimation(
+        fig, animate, frames=len(unique_times), interval=500, repeat=True, blit=False
+    )
 
     # Save as GIF with optimization
     output_file = save_dir / "agent_movement.gif"
@@ -436,7 +461,9 @@ def create_agent_movement_animation(df, save_dir):
 def main():
     """Main function to run all visualizations."""
     # Setup argument parser
-    parser = argparse.ArgumentParser(description="Generate simulation visualizations for tech blog")
+    parser = argparse.ArgumentParser(
+        description="Generate simulation visualizations for tech blog"
+    )
     parser.add_argument(
         "--log-dir",
         type=str,
