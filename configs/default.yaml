@@ -58,5 +58,5 @@ memory:
   
 # LLM parameters
 llm:
-  default_provider: "gemini"  # Options: "gemini", "azure"
+  default_provider: "azure"  # Options: "gemini", "azure"
   request_timeout: 30  # Timeout in seconds
