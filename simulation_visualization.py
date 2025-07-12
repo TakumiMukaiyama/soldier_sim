@@ -111,50 +111,59 @@ def visualize_skill_progression(df, save_dir):
     ]
     skill_names = ["Weapon Strength", "Management Skill", "Sociability", "Power"]
 
-    # Create figure with subplots (reduced DPI for smaller file size)
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10), dpi=80)
-    fig.suptitle("Agent Skill Progression Analysis", fontsize=16, fontweight="bold")
+    files_created = []
 
     # 1. Time series of average skills
-    ax1 = axes[0, 0]
+    plt.figure(figsize=(12, 8), dpi=80)
     daily_skills = df.groupby(df["time"].dt.date)[skill_columns].mean()
 
     for i, (col, name) in enumerate(zip(skill_columns, skill_names)):
-        ax1.plot(daily_skills.index, daily_skills[col], label=name, linewidth=2, alpha=0.8)
+        plt.plot(daily_skills.index, daily_skills[col], label=name, linewidth=2, alpha=0.8)
 
-    ax1.set_title("Average Skill Progression Over Time", fontweight="bold")
-    ax1.set_xlabel("Date")
-    ax1.set_ylabel("Skill Level")
-    ax1.legend()
-    ax1.grid(True, alpha=0.3)
-    ax1.tick_params(axis="x", rotation=45)
+    plt.title("Average Skill Progression Over Time", fontweight="bold", fontsize=14)
+    plt.xlabel("Date")
+    plt.ylabel("Skill Level")
+    plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.grid(True, alpha=0.3)
+    plt.xticks(rotation=45)
+
+    plt.tight_layout()
+    output_file = save_dir / "skill_progression_time_series.png"
+    plt.savefig(output_file, dpi=80, bbox_inches="tight", format="png")
+    plt.close()
+    files_created.append(output_file)
 
     # 2. Top performing agents
-    ax2 = axes[0, 1]
+    plt.figure(figsize=(12, 8), dpi=80)
     final_skills = df.groupby("agent_id")[skill_columns].last()
     top_agents = final_skills.sum(axis=1).nlargest(10)
 
     top_agent_data = final_skills.loc[top_agents.index]
     x_pos = np.arange(len(top_agent_data))
-    width = 0.2  # Adjusted for 4 skills
+    width = 0.2
 
     for i, (col, name) in enumerate(zip(skill_columns, skill_names)):
-        ax2.bar(x_pos + i * width, top_agent_data[col], width, label=name, alpha=0.8)
+        plt.bar(x_pos + i * width, top_agent_data[col], width, label=name, alpha=0.8)
 
-    ax2.set_title("Top 10 Agents - Final Skills", fontweight="bold")
-    ax2.set_xlabel("Agent ID")
-    ax2.set_ylabel("Skill Level")
-    ax2.set_xticks(x_pos + width * 1.5)  # Center the labels for 4 bars
-    ax2.set_xticklabels([f"Agent {i}" for i in range(len(top_agent_data))], rotation=45)
-    ax2.legend()
-    ax2.grid(True, alpha=0.3)
+    plt.title("Top 10 Agents - Final Skills", fontweight="bold", fontsize=14)
+    plt.xlabel("Agent ID")
+    plt.ylabel("Skill Level")
+    plt.xticks(x_pos + width * 1.5, [f"Agent {i}" for i in range(len(top_agent_data))], rotation=45)
+    plt.legend(bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    output_file = save_dir / "top_agents_skills.png"
+    plt.savefig(output_file, dpi=80, bbox_inches="tight", format="png")
+    plt.close()
+    files_created.append(output_file)
 
     # 3. Skill distribution comparison (start vs end)
-    ax3 = axes[1, 0]
+    plt.figure(figsize=(12, 8), dpi=80)
     start_skills = df.groupby("agent_id")[skill_columns].first()
     end_skills = df.groupby("agent_id")[skill_columns].last()
 
-    positions = [1, 2, 4, 5, 7, 8, 10, 11]  # Extended for 4 skills
+    positions = [1, 2, 4, 5, 7, 8, 10, 11]
     labels = []
     data_to_plot = []
 
@@ -162,21 +171,32 @@ def visualize_skill_progression(df, save_dir):
         data_to_plot.extend([start_skills[col], end_skills[col]])
         labels.extend([f"{name}\n(Start)", f"{name}\n(End)"])
 
-    box_plot = ax3.boxplot(data_to_plot, positions=positions, patch_artist=True)
+    box_plot = plt.boxplot(data_to_plot, positions=positions, patch_artist=True)
 
     # Color the boxes
-    colors = ["lightblue", "lightcoral"] * 4  # Extended for 4 skills
+    colors = ["lightblue", "lightcoral"] * 4
     for patch, color in zip(box_plot["boxes"], colors):
         patch.set_facecolor(color)
 
-    ax3.set_title("Skill Distribution: Start vs End", fontweight="bold")
-    ax3.set_ylabel("Skill Level")
-    ax3.set_xticks(positions)
-    ax3.set_xticklabels(labels, fontsize=9)
-    ax3.grid(True, alpha=0.3)
+    plt.title("Skill Distribution: Start vs End", fontweight="bold", fontsize=14)
+    plt.ylabel("Skill Level")
+    plt.xticks(positions, labels, fontsize=9)
+    plt.grid(True, alpha=0.3)
+
+    # Add legend for box colors
+    from matplotlib.patches import Patch
+
+    legend_elements = [Patch(facecolor="lightblue", label="Start"), Patch(facecolor="lightcoral", label="End")]
+    plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc="upper left")
+
+    plt.tight_layout()
+    output_file = save_dir / "skill_distribution_comparison.png"
+    plt.savefig(output_file, dpi=80, bbox_inches="tight", format="png")
+    plt.close()
+    files_created.append(output_file)
 
     # 4. Skill correlation matrix
-    ax4 = axes[1, 1]
+    plt.figure(figsize=(10, 8), dpi=80)
     correlation_data = df[skill_columns].corr()
 
     sns.heatmap(
@@ -185,19 +205,21 @@ def visualize_skill_progression(df, save_dir):
         cmap="coolwarm",
         center=0,
         square=True,
-        ax=ax4,
         cbar_kws={"shrink": 0.8},
     )
-    ax4.set_title("Skill Correlation Matrix", fontweight="bold")
-    ax4.set_xticklabels(skill_names, rotation=45)
-    ax4.set_yticklabels(skill_names, rotation=0)
+    plt.title("Skill Correlation Matrix", fontweight="bold", fontsize=14)
+    plt.xticks(rotation=45)
+    plt.yticks(rotation=0)
+
+    # Update tick labels
+    plt.gca().set_xticklabels(skill_names)
+    plt.gca().set_yticklabels(skill_names)
 
     plt.tight_layout()
-
-    # Save with smaller file size
-    output_file = save_dir / "skill_progression_analysis.png"
+    output_file = save_dir / "skill_correlation_matrix.png"
     plt.savefig(output_file, dpi=80, bbox_inches="tight", format="png")
     plt.close()
+    files_created.append(output_file)
 
     # Print statistics
     logger.info("Skill progression statistics:")
@@ -207,33 +229,31 @@ def visualize_skill_progression(df, save_dir):
         improvement = ((end_avg - start_avg) / start_avg) * 100
         logger.info(f"  {name}: {start_avg:.3f} → {end_avg:.3f} (+{improvement:.1f}%)")
 
-    return output_file
+    return files_created
 
 
 def visualize_poi_usage(df, save_dir):
     """Create POI usage analysis visualizations."""
     logger.info("Creating POI usage analysis...")
 
-    # Create figure with subplots (reduced DPI)
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10), dpi=80)
-    fig.suptitle("POI Usage Analysis", fontsize=16, fontweight="bold")
+    files_created = []
 
     # 1. POI visit distribution
-    ax1 = axes[0, 0]
+    plt.figure(figsize=(12, 8), dpi=80)
     poi_counts = df["poi_id"].value_counts()
 
     colors = plt.cm.Set3(np.linspace(0, 1, len(poi_counts)))
-    bars = ax1.bar(range(len(poi_counts)), poi_counts.values, color=colors)
-    ax1.set_title("POI Visit Distribution", fontweight="bold")
-    ax1.set_xlabel("POI")
-    ax1.set_ylabel("Number of Visits")
-    ax1.set_xticks(range(len(poi_counts)))
-    ax1.set_xticklabels(poi_counts.index, rotation=45, ha="right")
-    ax1.grid(True, alpha=0.3)
+    bars = plt.bar(range(len(poi_counts)), poi_counts.values, color=colors)
+
+    plt.title("POI Visit Distribution", fontweight="bold", fontsize=14)
+    plt.xlabel("POI")
+    plt.ylabel("Number of Visits")
+    plt.xticks(range(len(poi_counts)), poi_counts.index, rotation=45, ha="right")
+    plt.grid(True, alpha=0.3)
 
     # Add value labels on bars
     for bar, value in zip(bars, poi_counts.values):
-        ax1.text(
+        plt.text(
             bar.get_x() + bar.get_width() / 2,
             bar.get_height() + 500,
             f"{value:,}",
@@ -242,38 +262,55 @@ def visualize_poi_usage(df, save_dir):
             fontsize=9,
         )
 
+    # Create legend for POI colors
+    legend_elements = [
+        plt.Rectangle((0, 0), 1, 1, facecolor=colors[i], label=poi) for i, poi in enumerate(poi_counts.index)
+    ]
+    plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc="upper left")
+
+    plt.tight_layout()
+    output_file = save_dir / "poi_visit_distribution.png"
+    plt.savefig(output_file, dpi=80, bbox_inches="tight", format="png")
+    plt.close()
+    files_created.append(output_file)
+
     # 2. Hourly POI usage patterns
-    ax2 = axes[0, 1]
+    plt.figure(figsize=(12, 8), dpi=80)
     df["hour"] = df["time"].dt.hour
     hourly_poi = df.groupby(["hour", "poi_id"]).size().unstack(fill_value=0)
 
-    hourly_poi.plot(kind="bar", stacked=True, ax=ax2, color=colors[: len(hourly_poi.columns)])
-    ax2.set_title("Hourly POI Usage Patterns", fontweight="bold")
-    ax2.set_xlabel("Hour of Day")
-    ax2.set_ylabel("Number of Visits")
-    ax2.legend(title="POI", bbox_to_anchor=(1.05, 1), loc="upper left")
-    ax2.grid(True, alpha=0.3)
+    hourly_poi.plot(kind="bar", stacked=True, color=colors[: len(hourly_poi.columns)])
+    plt.title("Hourly POI Usage Patterns", fontweight="bold", fontsize=14)
+    plt.xlabel("Hour of Day")
+    plt.ylabel("Number of Visits")
+    plt.legend(title="POI", bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.grid(True, alpha=0.3)
+
+    plt.tight_layout()
+    output_file = save_dir / "hourly_poi_usage.png"
+    plt.savefig(output_file, dpi=80, bbox_inches="tight", format="png")
+    plt.close()
+    files_created.append(output_file)
 
     # 3. POI efficiency (visits per agent per day)
-    ax3 = axes[1, 0]
+    plt.figure(figsize=(12, 8), dpi=80)
     daily_poi_usage = df.groupby([df["time"].dt.date, "poi_id", "agent_id"]).size().reset_index(name="visits")
     poi_efficiency = daily_poi_usage.groupby("poi_id")["visits"].mean()
 
-    bars = ax3.bar(
+    bars = plt.bar(
         range(len(poi_efficiency)),
         poi_efficiency.values,
         color=colors[: len(poi_efficiency)],
     )
-    ax3.set_title("Average Visits per Agent per Day by POI", fontweight="bold")
-    ax3.set_xlabel("POI")
-    ax3.set_ylabel("Avg Visits per Agent per Day")
-    ax3.set_xticks(range(len(poi_efficiency)))
-    ax3.set_xticklabels(poi_efficiency.index, rotation=45, ha="right")
-    ax3.grid(True, alpha=0.3)
+    plt.title("Average Visits per Agent per Day by POI", fontweight="bold", fontsize=14)
+    plt.xlabel("POI")
+    plt.ylabel("Avg Visits per Agent per Day")
+    plt.xticks(range(len(poi_efficiency)), poi_efficiency.index, rotation=45, ha="right")
+    plt.grid(True, alpha=0.3)
 
     # Add value labels
     for bar, value in zip(bars, poi_efficiency.values):
-        ax3.text(
+        plt.text(
             bar.get_x() + bar.get_width() / 2,
             bar.get_height() + 0.1,
             f"{value:.1f}",
@@ -282,28 +319,39 @@ def visualize_poi_usage(df, save_dir):
             fontsize=9,
         )
 
+    # Create legend for POI colors
+    legend_elements = [
+        plt.Rectangle((0, 0), 1, 1, facecolor=colors[i], label=poi) for i, poi in enumerate(poi_efficiency.index)
+    ]
+    plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc="upper left")
+
+    plt.tight_layout()
+    output_file = save_dir / "poi_efficiency_analysis.png"
+    plt.savefig(output_file, dpi=80, bbox_inches="tight", format="png")
+    plt.close()
+    files_created.append(output_file)
+
     # 4. POI usage trends over time
-    ax4 = axes[1, 1]
+    plt.figure(figsize=(12, 8), dpi=80)
     # Calculate weeks from simulation start
     start_date = df["time"].min()
     simulation_week = (df["time"] - start_date).dt.days // 7
     weekly_poi = df.groupby([simulation_week, "poi_id"]).size().unstack(fill_value=0)
 
     for poi in weekly_poi.columns:
-        ax4.plot(weekly_poi.index, weekly_poi[poi], label=poi, linewidth=2, alpha=0.8)
+        plt.plot(weekly_poi.index, weekly_poi[poi], label=poi, linewidth=2, alpha=0.8)
 
-    ax4.set_title("Weekly POI Usage Trends", fontweight="bold")
-    ax4.set_xlabel("Week (from simulation start)")
-    ax4.set_ylabel("Total Visits")
-    ax4.legend(title="POI")
-    ax4.grid(True, alpha=0.3)
+    plt.title("Weekly POI Usage Trends", fontweight="bold", fontsize=14)
+    plt.xlabel("Week (from simulation start)")
+    plt.ylabel("Total Visits")
+    plt.legend(title="POI", bbox_to_anchor=(1.05, 1), loc="upper left")
+    plt.grid(True, alpha=0.3)
 
     plt.tight_layout()
-
-    # Save with smaller file size
-    output_file = save_dir / "poi_usage_analysis.png"
+    output_file = save_dir / "weekly_poi_usage_trends.png"
     plt.savefig(output_file, dpi=80, bbox_inches="tight", format="png")
     plt.close()
+    files_created.append(output_file)
 
     # Print POI statistics
     logger.info("POI usage statistics:")
@@ -312,7 +360,7 @@ def visualize_poi_usage(df, save_dir):
         percentage = (count / total_visits) * 100
         logger.info(f"  {poi}: {count:,} visits ({percentage:.1f}%)")
 
-    return output_file
+    return files_created
 
 
 def create_agent_movement_animation(df, save_dir):
@@ -336,7 +384,7 @@ def create_agent_movement_animation(df, save_dir):
     poi_locations = df_sampled.groupby("poi_id")[["x", "y"]].mean()
 
     # Create figure
-    fig, ax = plt.subplots(figsize=(10, 8), dpi=60)  # Lower DPI for smaller file
+    fig, ax = plt.subplots(figsize=(15, 8), dpi=60)  # Lower DPI for smaller file
 
     def animate(frame):
         ax.clear()
@@ -408,12 +456,12 @@ def main():
     files_created = []
 
     # 1. Skill progression analysis
-    skill_file = visualize_skill_progression(df, save_dir)
-    files_created.append(skill_file)
+    skill_files = visualize_skill_progression(df, save_dir)
+    files_created.extend(skill_files)
 
     # 2. POI usage analysis
-    poi_file = visualize_poi_usage(df, save_dir)
-    files_created.append(poi_file)
+    poi_files = visualize_poi_usage(df, save_dir)
+    files_created.extend(poi_files)
 
     # 3. Agent movement animation (GIF only)
     movement_file = create_agent_movement_animation(df, save_dir)
