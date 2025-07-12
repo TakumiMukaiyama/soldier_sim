@@ -20,14 +20,36 @@ pois:
     - training
     - food
     - rest
+    - sleep
     - office
     - armory
+    - recreation
+    - medical
+    - fitness
+    - library
+    - workshop
+    - communications
+    - maintenance
+    - outdoor
+    - spiritual
+    - logistics
   distribution:
-    training: 0.4
-    food: 0.2
-    rest: 0.2
-    office: 0.1
-    armory: 0.1
+    training: 0.25
+    food: 0.15
+    rest: 0.10
+    sleep: 0.10
+    office: 0.08
+    armory: 0.08
+    recreation: 0.06
+    medical: 0.05
+    fitness: 0.04
+    library: 0.03
+    workshop: 0.02
+    communications: 0.015
+    maintenance: 0.015
+    outdoor: 0.01
+    spiritual: 0.01
+    logistics: 0.005
     
 # Memory parameters
 memory:

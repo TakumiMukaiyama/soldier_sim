@@ -1,0 +1,632 @@
+[
+  {
+    "id": "training_ground_1",
+    "name": "Main Training Field",
+    "category": "training",
+    "location": [
+      10.0,
+      20.0
+    ],
+    "belief": {
+      "satisfaction": 0.7278853596915766,
+      "price": 0.3575032265668001,
+      "convenience": 0.7325087955107358,
+      "atmosphere": 0.5169632214446468
+    },
+    "belief_sigma": {
+      "satisfaction": 0.28547068212460186,
+      "price": 0.27650492311343666,
+      "convenience": 0.3088269351557268,
+      "atmosphere": 0.1880408248944124
+    },
+    "effects": {
+      "energy": -1.4967868271379825,
+      "hunger": 0.9159215818103181,
+      "social": 0.6193025904119891,
+      "weapon_strength": 0.8899306626677139,
+      "management_skill": -0.3075074911496433,
+      "sociability": -0.6250896201571173,
+      "power": 1.82696488836193
+    }
+  },
+  {
+    "id": "training_ground_2",
+    "name": "Advanced Combat Zone",
+    "category": "training",
+    "location": [
+      15.0,
+      25.0
+    ],
+    "belief": {
+      "satisfaction": 0.4440881244081392,
+      "price": 0.5267797051627726,
+      "convenience": 0.6928291370033479,
+      "atmosphere": 0.3519496279034183
+    },
+    "belief_sigma": {
+      "satisfaction": 0.29587288777492116,
+      "price": 0.279720909248234,
+      "convenience": 0.22603757747769876,
+      "atmosphere": 0.1983219249717672
+    },
+    "effects": {
+      "energy": -2.7419701738999214,
+      "hunger": 2.0084966198084757,
+      "social": 0.46223561882013464,
+      "weapon_strength": 1.6842769639646282,
+      "management_skill": -0.5897311373296275,
+      "sociability": 0.25947662710983105,
+      "power": 2.337839072016291
+    }
+  },
+  {
+    "id": "cafeteria_1",
+    "name": "Main Cafeteria",
+    "category": "food",
+    "location": [
+      5.0,
+      10.0
+    ],
+    "belief": {
+      "satisfaction": 0.5072456182909401,
+      "price": 0.8419347291938112,
+      "convenience": 0.763560313162506,
+      "atmosphere": 0.5156121893819681
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2994106996379492,
+      "price": 0.2677779628546369,
+      "convenience": 0.3042560350466166,
+      "atmosphere": 0.2616028217885143
+    },
+    "effects": {
+      "energy": 0.8736327781612643,
+      "hunger": -4.252124813845824,
+      "social": 1.339674531816618,
+      "weapon_strength": -0.3393991423541625,
+      "management_skill": 0.3245486203457908,
+      "sociability": -0.6176813794787626,
+      "power": -0.33321583813394473
+    }
+  },
+  {
+    "id": "cafeteria_2",
+    "name": "Officer's Mess",
+    "category": "food",
+    "location": [
+      8.0,
+      12.0
+    ],
+    "belief": {
+      "satisfaction": 0.9,
+      "price": 0.35944965369102533,
+      "convenience": 0.5610542901350648,
+      "atmosphere": 0.6128521092314463
+    },
+    "belief_sigma": {
+      "satisfaction": 0.215046673307367,
+      "price": 0.3154981881568741,
+      "convenience": 0.27220530778698904,
+      "atmosphere": 0.2663696508500482
+    },
+    "effects": {
+      "energy": 1.1276732650545886,
+      "hunger": -4.206285989618043,
+      "social": 1.0839998559124557,
+      "weapon_strength": -0.06583015373521225,
+      "management_skill": 0.1302683188918858,
+      "sociability": 1.371572618450025,
+      "power": -0.08923144940607525
+    }
+  },
+  {
+    "id": "barracks_1",
+    "name": "Main Barracks",
+    "category": "rest",
+    "location": [
+      3.0,
+      5.0
+    ],
+    "belief": {
+      "satisfaction": 0.36857038403796183,
+      "price": 0.8827999734638735,
+      "convenience": 0.6187144215892313,
+      "atmosphere": 0.25963007317121134
+    },
+    "belief_sigma": {
+      "satisfaction": 0.22231795720886227,
+      "price": 0.2151611313963554,
+      "convenience": 0.20664742653794896,
+      "atmosphere": 0.31643645715025814
+    },
+    "effects": {
+      "energy": 3.4373791406363985,
+      "hunger": 0.4487285538443261,
+      "social": -0.5246888884475607,
+      "weapon_strength": -0.24107190010116852,
+      "management_skill": -0.19010941011781352,
+      "sociability": 1.007045652565133,
+      "power": -0.15202349538360993
+    }
+  },
+  {
+    "id": "office_1",
+    "name": "Command Center",
+    "category": "office",
+    "location": [
+      20.0,
+      5.0
+    ],
+    "belief": {
+      "satisfaction": 0.11227362683263016,
+      "price": 0.4288224825568806,
+      "convenience": 0.5253757970670622,
+      "atmosphere": 0.7193468650807431
+    },
+    "belief_sigma": {
+      "satisfaction": 0.23491007577105957,
+      "price": 0.20789811387359247,
+      "convenience": 0.3246306409742665,
+      "atmosphere": 0.25142894405146965
+    },
+    "effects": {
+      "energy": -0.723532374978146,
+      "hunger": 0.7752476186177784,
+      "social": 1.1532959800798104,
+      "weapon_strength": -0.4618833763088257,
+      "management_skill": 2.5090912946085524,
+      "sociability": -0.7122806957194727,
+      "power": -0.37102842809607794
+    }
+  },
+  {
+    "id": "armory_1",
+    "name": "Main Armory",
+    "category": "armory",
+    "location": [
+      25.0,
+      15.0
+    ],
+    "belief": {
+      "satisfaction": 0.5992242760480193,
+      "price": 0.6087343035297411,
+      "convenience": 0.8413235132840854,
+      "atmosphere": 0.6082339106703494
+    },
+    "belief_sigma": {
+      "satisfaction": 0.17672215329142293,
+      "price": 0.2831082729040292,
+      "convenience": 0.2772565553539862,
+      "atmosphere": 0.25554554956131925
+    },
+    "effects": {
+      "energy": -0.539140849598537,
+      "hunger": 0.3722342237975239,
+      "social": 0.572289556512648,
+      "weapon_strength": 3.0255117642269163,
+      "management_skill": -0.28269203039240687,
+      "sociability": 0.5268519129102681,
+      "power": 1.0580334304506545
+    }
+  },
+  {
+    "id": "training_ground_3",
+    "name": "Tactical Drills Field",
+    "category": "training",
+    "location": [
+      12.0,
+      18.0
+    ],
+    "belief": {
+      "satisfaction": 0.6001172226100596,
+      "price": 0.5035955641590394,
+      "convenience": 0.8237883518034461,
+      "atmosphere": 0.61115557095103
+    },
+    "belief_sigma": {
+      "satisfaction": 0.21976671871729492,
+      "price": 0.2708424242299008,
+      "convenience": 0.26634553171572584,
+      "atmosphere": 0.1979258902824452
+    },
+    "effects": {
+      "energy": -1.7817877966828934,
+      "hunger": 1.2003431376767661,
+      "social": 1.1944936342028039,
+      "weapon_strength": 0.7116860454314994,
+      "management_skill": 0.8287532400225454,
+      "sociability": 1.345038535041391,
+      "power": 1.8574591697587703
+    }
+  },
+  {
+    "id": "recreation_1",
+    "name": "Recreation Room",
+    "category": "recreation",
+    "location": [
+      7.0,
+      8.0
+    ],
+    "belief": {
+      "satisfaction": 0.9,
+      "price": 0.7994996588083538,
+      "convenience": 0.7422542376207985,
+      "atmosphere": 0.6673775499482564
+    },
+    "belief_sigma": {
+      "satisfaction": 0.30670143988060605,
+      "price": 0.31704241679469913,
+      "convenience": 0.1878480178101818,
+      "atmosphere": 0.24789856949749206
+    },
+    "effects": {
+      "energy": 0.27703487869985766,
+      "hunger": 0.2851694268592388,
+      "social": 2.829882156096966,
+      "weapon_strength": -0.4409660226359645,
+      "management_skill": 0.24830550221620606,
+      "sociability": 3.0,
+      "power": -0.17654017534884553
+    }
+  },
+  {
+    "id": "office_2",
+    "name": "Strategy Room",
+    "category": "office",
+    "location": [
+      18.0,
+      7.0
+    ],
+    "belief": {
+      "satisfaction": 0.2846275880401773,
+      "price": 0.4135394616326246,
+      "convenience": 0.6117888266338375,
+      "atmosphere": 0.7689793207269928
+    },
+    "belief_sigma": {
+      "satisfaction": 0.20517265950845437,
+      "price": 0.22175744369513423,
+      "convenience": 0.3242724034991342,
+      "atmosphere": 0.27248170864591803
+    },
+    "effects": {
+      "energy": -1.3651815977810655,
+      "hunger": 0.6028513372884732,
+      "social": 1.05298523107434,
+      "weapon_strength": -0.2619311604420538,
+      "management_skill": 2.9257201006974047,
+      "sociability": 1.327054405661679,
+      "power": -0.4678695693290643
+    }
+  },
+  {
+    "id": "library_1",
+    "name": "Military Library",
+    "category": "library",
+    "location": [
+      22.0,
+      9.0
+    ],
+    "belief": {
+      "satisfaction": 0.6141986172018064,
+      "price": 0.8393308871810297,
+      "convenience": 0.5186825351433463,
+      "atmosphere": 0.9
+    },
+    "belief_sigma": {
+      "satisfaction": 0.30394531003806197,
+      "price": 0.185628602483298,
+      "convenience": 0.21070069515534925,
+      "atmosphere": 0.2753466667444421
+    },
+    "effects": {
+      "energy": -0.15737414400482935,
+      "hunger": 0.08360261578707648,
+      "social": -0.6292283454255481,
+      "weapon_strength": -0.11550180134001398,
+      "management_skill": 2.391375751960074,
+      "sociability": -0.05158860753546324,
+      "power": -0.5857540513828734
+    }
+  },
+  {
+    "id": "dormitory_1",
+    "name": "Main Dormitory",
+    "category": "sleep",
+    "location": [
+      2.0,
+      3.0
+    ],
+    "belief": {
+      "satisfaction": 0.4193861628457646,
+      "price": 0.8793153547219132,
+      "convenience": 0.7770735869059763,
+      "atmosphere": 0.4901074004110025
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2843613774189776,
+      "price": 0.2760046820939952,
+      "convenience": 0.3226247817048949,
+      "atmosphere": 0.1897626806727938
+    },
+    "effects": {
+      "energy": 4.349193800352172,
+      "hunger": 0.3141253450644869,
+      "social": -0.2308318713001209,
+      "weapon_strength": -0.09687101609935751,
+      "management_skill": 0.0,
+      "sociability": 0.28063415508939077,
+      "power": -0.1328729131998357
+    }
+  },
+  {
+    "id": "dormitory_2",
+    "name": "Officer Quarters",
+    "category": "sleep",
+    "location": [
+      4.0,
+      6.0
+    ],
+    "belief": {
+      "satisfaction": 0.8499612895764201,
+      "price": 0.8269796797828038,
+      "convenience": 0.8829392235160372,
+      "atmosphere": 0.8084047314285491
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2575487968674772,
+      "price": 0.18258824942873217,
+      "convenience": 0.324892370261909,
+      "atmosphere": 0.30040413776199276
+    },
+    "effects": {
+      "energy": 4.7997866663623485,
+      "hunger": 0.29138467527043105,
+      "social": -0.171751620480491,
+      "weapon_strength": -0.05937582447032844,
+      "management_skill": 0.3562795508741702,
+      "sociability": 0.697043507045007,
+      "power": -0.26481876001669263
+    }
+  },
+  {
+    "id": "medical_center_1",
+    "name": "Base Medical Center",
+    "category": "medical",
+    "location": [
+      30.0,
+      12.0
+    ],
+    "belief": {
+      "satisfaction": 0.27579462379538316,
+      "price": 0.4455926531339177,
+      "convenience": 0.3295609174516456,
+      "atmosphere": 0.3852211805845708
+    },
+    "belief_sigma": {
+      "satisfaction": 0.4,
+      "price": 0.4,
+      "convenience": 0.4,
+      "atmosphere": 0.4
+    },
+    "effects": {
+      "energy": 1.8780246952967385,
+      "hunger": -0.21877438101850472,
+      "social": 0.5475081744897538,
+      "weapon_strength": -0.17468287917543546,
+      "management_skill": 0.1533460994043371,
+      "sociability": 0.726686222153476,
+      "power": -0.051214663772561564
+    }
+  },
+  {
+    "id": "gym_1",
+    "name": "Base Gymnasium",
+    "category": "fitness",
+    "location": [
+      16.0,
+      22.0
+    ],
+    "belief": {
+      "satisfaction": 0.6114330545814964,
+      "price": 0.8252532783376914,
+      "convenience": 0.7008551148758541,
+      "atmosphere": 0.7058159676144856
+    },
+    "belief_sigma": {
+      "satisfaction": 0.19861490919092248,
+      "price": 0.31911683549116754,
+      "convenience": 0.18701671978608803,
+      "atmosphere": 0.20287374414710846
+    },
+    "effects": {
+      "energy": -1.4280680316317254,
+      "hunger": 1.4341723884776625,
+      "social": 0.647729208673175,
+      "weapon_strength": 0.5567114921200647,
+      "management_skill": -0.6704112340640089,
+      "sociability": 0.5787856359003911,
+      "power": 2.8716289061992617
+    }
+  },
+  {
+    "id": "workshop_1",
+    "name": "Equipment Workshop",
+    "category": "workshop",
+    "location": [
+      26.0,
+      18.0
+    ],
+    "belief": {
+      "satisfaction": 0.4838449830671744,
+      "price": 0.7251016867873674,
+      "convenience": 0.5068348146595877,
+      "atmosphere": 0.5304118773209282
+    },
+    "belief_sigma": {
+      "satisfaction": 0.3806388799135304,
+      "price": 0.4,
+      "convenience": 0.3858028928923768,
+      "atmosphere": 0.4
+    },
+    "effects": {
+      "energy": -0.6488813045513588,
+      "hunger": 0.34352586869589435,
+      "social": 0.4749713135711517,
+      "weapon_strength": 2.4990726645126657,
+      "management_skill": 0.1603014133775983,
+      "sociability": 0.30639721121708935,
+      "power": 1.4976578687130566
+    }
+  },
+  {
+    "id": "communications_1",
+    "name": "Communications Center",
+    "category": "communications",
+    "location": [
+      19.0,
+      3.0
+    ],
+    "belief": {
+      "satisfaction": 0.2146521442199265,
+      "price": 0.5139462936801121,
+      "convenience": 0.7295601244251204,
+      "atmosphere": 0.7299778133981127
+    },
+    "belief_sigma": {
+      "satisfaction": 0.30712962605296595,
+      "price": 0.30689053637268143,
+      "convenience": 0.23042906331083257,
+      "atmosphere": 0.19866202485358478
+    },
+    "effects": {
+      "energy": -0.20766016182109742,
+      "hunger": 0.3923857906264396,
+      "social": 1.5046938642912948,
+      "weapon_strength": -0.10973751893072303,
+      "management_skill": 1.7002469727838843,
+      "sociability": 3.0,
+      "power": -0.4203727486800133
+    }
+  },
+  {
+    "id": "motor_pool_1",
+    "name": "Motor Pool",
+    "category": "maintenance",
+    "location": [
+      35.0,
+      20.0
+    ],
+    "belief": {
+      "satisfaction": 0.5326777429932154,
+      "price": 0.9,
+      "convenience": 0.3902873343180103,
+      "atmosphere": 0.2846286011257307
+    },
+    "belief_sigma": {
+      "satisfaction": 0.36605539665641257,
+      "price": 0.4,
+      "convenience": 0.39085223184722234,
+      "atmosphere": 0.4
+    },
+    "effects": {
+      "energy": -1.3416096590217543,
+      "hunger": 0.793119111289626,
+      "social": 0.8432018946475939,
+      "weapon_strength": 1.7076622279769134,
+      "management_skill": 0.8152836561416394,
+      "sociability": 0.4975866284878223,
+      "power": 0.95537908062764
+    }
+  },
+  {
+    "id": "outdoor_training_1",
+    "name": "Outdoor Training Course",
+    "category": "outdoor",
+    "location": [
+      40.0,
+      30.0
+    ],
+    "belief": {
+      "satisfaction": 0.8847151545127453,
+      "price": 0.8330040671916755,
+      "convenience": 0.15106370672633468,
+      "atmosphere": 0.9
+    },
+    "belief_sigma": {
+      "satisfaction": 0.27056700659520694,
+      "price": 0.2142932893651522,
+      "convenience": 0.4,
+      "atmosphere": 0.25775206316895866
+    },
+    "effects": {
+      "energy": -1.9701361640199144,
+      "hunger": 2.042357142935936,
+      "social": 1.0273541735233134,
+      "weapon_strength": 2.00075701193161,
+      "management_skill": -0.6168598140738175,
+      "sociability": -0.7398049119409864,
+      "power": 3.2495057398938765
+    }
+  },
+  {
+    "id": "chapel_1",
+    "name": "Base Chapel",
+    "category": "spiritual",
+    "location": [
+      6.0,
+      15.0
+    ],
+    "belief": {
+      "satisfaction": 0.6296187571134964,
+      "price": 0.8882336557846416,
+      "convenience": 0.5424775049790401,
+      "atmosphere": 0.9
+    },
+    "belief_sigma": {
+      "satisfaction": 0.4,
+      "price": 0.12910538730013543,
+      "convenience": 0.3098386954789712,
+      "atmosphere": 0.2065114807509631
+    },
+    "effects": {
+      "energy": 1.7304808208706053,
+      "hunger": -0.05617356610072993,
+      "social": 1.2723969060904277,
+      "weapon_strength": -0.40726799700067723,
+      "management_skill": 0.26994356870675096,
+      "sociability": -0.17590700650284585,
+      "power": -0.04207139058379539
+    }
+  },
+  {
+    "id": "supply_depot_1",
+    "name": "Supply Depot",
+    "category": "logistics",
+    "location": [
+      32.0,
+      8.0
+    ],
+    "belief": {
+      "satisfaction": 0.1729211392439928,
+      "price": 0.7428618098792888,
+      "convenience": 0.793231515982119,
+      "atmosphere": 0.41442486139899726
+    },
+    "belief_sigma": {
+      "satisfaction": 0.3537179542847282,
+      "price": 0.4,
+      "convenience": 0.2248278201919643,
+      "atmosphere": 0.4
+    },
+    "effects": {
+      "energy": -0.7399165742433167,
+      "hunger": 0.5724247054812828,
+      "social": 0.5648573758417743,
+      "weapon_strength": 0.02330006974365384,
+      "management_skill": 3.362682166724567,
+      "sociability": 1.3675245216020722,
+      "power": -0.08484404919733102
+    }
+  }
+]

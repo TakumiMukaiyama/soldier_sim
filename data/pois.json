@@ -3,7 +3,10 @@
     "id": "training_ground_1",
     "name": "Main Training Field",
     "category": "training",
-    "location": [10.0, 20.0],
+    "location": [
+      10.0,
+      20.0
+    ],
     "belief": {
       "satisfaction": 0.7,
       "price": 0.5,
@@ -17,19 +20,23 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": -0.15,
-      "hunger": 0.12,
-      "social": 0.08,
-      "weapon_strength": 0.10,
-      "management_skill": 0.03,
-      "sociability": 0.05
+      "energy": -1.5,
+      "hunger": 1.2,
+      "social": 0.8,
+      "weapon_strength": 0.8,
+      "management_skill": -0.2,
+      "sociability": 0.5,
+      "power": 1.8
     }
   },
   {
     "id": "training_ground_2",
     "name": "Advanced Combat Zone",
     "category": "training",
-    "location": [15.0, 25.0],
+    "location": [
+      15.0,
+      25.0
+    ],
     "belief": {
       "satisfaction": 0.6,
       "price": 0.5,
@@ -43,19 +50,23 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": -0.25,
-      "hunger": 0.18,
-      "social": 0.04,
-      "weapon_strength": 0.18,
-      "management_skill": 0.0,
-      "sociability": 0.03
+      "energy": -2.5,
+      "hunger": 1.8,
+      "social": 0.4,
+      "weapon_strength": 1.5,
+      "management_skill": -0.3,
+      "sociability": 0.3,
+      "power": 2.2
     }
   },
   {
     "id": "cafeteria_1",
     "name": "Main Cafeteria",
     "category": "food",
-    "location": [5.0, 10.0],
+    "location": [
+      5.0,
+      10.0
+    ],
     "belief": {
       "satisfaction": 0.6,
       "price": 0.7,
@@ -69,19 +80,23 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": 0.10,
-      "hunger": -0.40,
-      "social": 0.15,
-      "weapon_strength": 0.0,
-      "management_skill": 0.02,
-      "sociability": 0.12
+      "energy": 1.0,
+      "hunger": -4.0,
+      "social": 1.5,
+      "weapon_strength": -0.1,
+      "management_skill": 0.2,
+      "sociability": 1.5,
+      "power": -0.2
     }
   },
   {
     "id": "cafeteria_2",
     "name": "Officer's Mess",
     "category": "food",
-    "location": [8.0, 12.0],
+    "location": [
+      8.0,
+      12.0
+    ],
     "belief": {
       "satisfaction": 0.8,
       "price": 0.4,
@@ -95,19 +110,23 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": 0.12,
-      "hunger": -0.45,
-      "social": 0.20,
-      "weapon_strength": 0.0,
-      "management_skill": 0.07,
-      "sociability": 0.15
+      "energy": 1.2,
+      "hunger": -4.5,
+      "social": 1.0,
+      "weapon_strength": -0.1,
+      "management_skill": 0.1,
+      "sociability": 1.5,
+      "power": -0.2
     }
   },
   {
     "id": "barracks_1",
     "name": "Main Barracks",
     "category": "rest",
-    "location": [3.0, 5.0],
+    "location": [
+      3.0,
+      5.0
+    ],
     "belief": {
       "satisfaction": 0.5,
       "price": 0.8,
@@ -121,19 +140,23 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": 0.35,
-      "hunger": 0.02,
-      "social": -0.05,
-      "weapon_strength": -0.01,
-      "management_skill": -0.01,
-      "sociability": 0.08
+      "energy": 3.5,
+      "hunger": 0.2,
+      "social": -0.5,
+      "weapon_strength": -0.1,
+      "management_skill": -0.1,
+      "sociability": 0.8,
+      "power": 0.0
     }
   },
   {
     "id": "office_1",
     "name": "Command Center",
     "category": "office",
-    "location": [20.0, 5.0],
+    "location": [
+      20.0,
+      5.0
+    ],
     "belief": {
       "satisfaction": 0.4,
       "price": 0.5,
@@ -147,19 +170,23 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": -0.08,
-      "hunger": 0.06,
-      "social": 0.12,
-      "weapon_strength": 0.0,
-      "management_skill": 0.15,
-      "sociability": 0.10
+      "energy": -0.8,
+      "hunger": 0.6,
+      "social": 1.2,
+      "weapon_strength": -0.2,
+      "management_skill": 2.0,
+      "sociability": 1.0,
+      "power": -0.3
     }
   },
   {
     "id": "armory_1",
     "name": "Main Armory",
     "category": "armory",
-    "location": [25.0, 15.0],
+    "location": [
+      25.0,
+      15.0
+    ],
     "belief": {
       "satisfaction": 0.6,
       "price": 0.6,
@@ -173,19 +200,23 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": -0.05,
-      "hunger": 0.04,
-      "social": 0.03,
-      "weapon_strength": 0.22,
-      "management_skill": 0.05,
-      "sociability": 0.07
+      "energy": -0.5,
+      "hunger": 0.4,
+      "social": 0.3,
+      "weapon_strength": 2.8,
+      "management_skill": -0.2,
+      "sociability": 0.6,
+      "power": 1.2
     }
   },
   {
     "id": "training_ground_3",
     "name": "Tactical Drills Field",
     "category": "training",
-    "location": [12.0, 18.0],
+    "location": [
+      12.0,
+      18.0
+    ],
     "belief": {
       "satisfaction": 0.65,
       "price": 0.6,
@@ -199,19 +230,23 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": -0.18,
-      "hunger": 0.15,
-      "social": 0.13,
-      "weapon_strength": 0.12,
-      "management_skill": 0.08,
-      "sociability": 0.10
+      "energy": -1.8,
+      "hunger": 1.5,
+      "social": 1.3,
+      "weapon_strength": 1.0,
+      "management_skill": 0.5,
+      "sociability": 1.0,
+      "power": 1.6
     }
   },
   {
     "id": "recreation_1",
     "name": "Recreation Room",
     "category": "recreation",
-    "location": [7.0, 8.0],
+    "location": [
+      7.0,
+      8.0
+    ],
     "belief": {
       "satisfaction": 0.8,
       "price": 0.7,
@@ -225,19 +260,23 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": 0.05,
-      "hunger": 0.03,
-      "social": 0.25,
-      "weapon_strength": -0.01,
-      "management_skill": 0.03,
-      "sociability": 0.20
+      "energy": 0.5,
+      "hunger": 0.3,
+      "social": 2.8,
+      "weapon_strength": -0.3,
+      "management_skill": 0.2,
+      "sociability": 2.5,
+      "power": -0.4
     }
   },
   {
     "id": "office_2",
     "name": "Strategy Room",
     "category": "office",
-    "location": [18.0, 7.0],
+    "location": [
+      18.0,
+      7.0
+    ],
     "belief": {
       "satisfaction": 0.5,
       "price": 0.5,
@@ -251,12 +290,343 @@
       "atmosphere": 0.2
     },
     "effects": {
-      "energy": -0.12,
-      "hunger": 0.07,
-      "social": 0.10,
-      "weapon_strength": 0.05,
-      "management_skill": 0.17,
-      "sociability": 0.15
+      "energy": -1.2,
+      "hunger": 0.7,
+      "social": 1.0,
+      "weapon_strength": -0.1,
+      "management_skill": 2.0,
+      "sociability": 1.5,
+      "power": -0.3
+    }
+  },
+  {
+    "id": "library_1",
+    "name": "Military Library",
+    "category": "library",
+    "location": [
+      22.0,
+      9.0
+    ],
+    "belief": {
+      "satisfaction": 0.7,
+      "price": 0.8,
+      "convenience": 0.6,
+      "atmosphere": 0.8
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": -0.2,
+      "hunger": 0.1,
+      "social": -0.8,
+      "weapon_strength": -0.3,
+      "management_skill": 1.8,
+      "sociability": 0.2,
+      "power": -0.4
+    }
+  },
+  {
+    "id": "dormitory_1",
+    "name": "Main Dormitory",
+    "category": "sleep",
+    "location": [
+      2.0,
+      3.0
+    ],
+    "belief": {
+      "satisfaction": 0.6,
+      "price": 0.9,
+      "convenience": 0.8,
+      "atmosphere": 0.5
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": 4.5,
+      "hunger": 0.5,
+      "social": -0.2,
+      "weapon_strength": -0.05,
+      "management_skill": 0.0,
+      "sociability": 0.2,
+      "power": 0.0
+    }
+  },
+  {
+    "id": "dormitory_2",
+    "name": "Officer Quarters",
+    "category": "sleep",
+    "location": [
+      4.0,
+      6.0
+    ],
+    "belief": {
+      "satisfaction": 0.8,
+      "price": 0.7,
+      "convenience": 0.9,
+      "atmosphere": 0.7
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": 5.0,
+      "hunger": 0.3,
+      "social": 0.0,
+      "weapon_strength": 0.0,
+      "management_skill": 0.2,
+      "sociability": 0.5,
+      "power": 0.0
+    }
+  },
+  {
+    "id": "medical_center_1",
+    "name": "Base Medical Center",
+    "category": "medical",
+    "location": [
+      30.0,
+      12.0
+    ],
+    "belief": {
+      "satisfaction": 0.5,
+      "price": 0.3,
+      "convenience": 0.4,
+      "atmosphere": 0.3
+    },
+    "belief_sigma": {
+      "satisfaction": 0.3,
+      "price": 0.3,
+      "convenience": 0.3,
+      "atmosphere": 0.3
+    },
+    "effects": {
+      "energy": 2.0,
+      "hunger": -0.5,
+      "social": 0.5,
+      "weapon_strength": -0.2,
+      "management_skill": 0.1,
+      "sociability": 0.8,
+      "power": -0.2
+    }
+  },
+  {
+    "id": "gym_1",
+    "name": "Base Gymnasium",
+    "category": "fitness",
+    "location": [
+      16.0,
+      22.0
+    ],
+    "belief": {
+      "satisfaction": 0.7,
+      "price": 0.8,
+      "convenience": 0.7,
+      "atmosphere": 0.6
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": -1.2,
+      "hunger": 1.2,
+      "social": 0.8,
+      "weapon_strength": 0.5,
+      "management_skill": -0.4,
+      "sociability": 0.6,
+      "power": 2.8
+    }
+  },
+  {
+    "id": "workshop_1",
+    "name": "Equipment Workshop",
+    "category": "workshop",
+    "location": [
+      26.0,
+      18.0
+    ],
+    "belief": {
+      "satisfaction": 0.6,
+      "price": 0.7,
+      "convenience": 0.5,
+      "atmosphere": 0.4
+    },
+    "belief_sigma": {
+      "satisfaction": 0.3,
+      "price": 0.3,
+      "convenience": 0.3,
+      "atmosphere": 0.3
+    },
+    "effects": {
+      "energy": -0.8,
+      "hunger": 0.6,
+      "social": 0.5,
+      "weapon_strength": 2.2,
+      "management_skill": 0.1,
+      "sociability": 0.3,
+      "power": 1.2
+    }
+  },
+  {
+    "id": "communications_1",
+    "name": "Communications Center",
+    "category": "communications",
+    "location": [
+      19.0,
+      3.0
+    ],
+    "belief": {
+      "satisfaction": 0.5,
+      "price": 0.6,
+      "convenience": 0.8,
+      "atmosphere": 0.6
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": -0.5,
+      "hunger": 0.3,
+      "social": 1.8,
+      "weapon_strength": -0.3,
+      "management_skill": 1.0,
+      "sociability": 2.5,
+      "power": -0.3
+    }
+  },
+  {
+    "id": "motor_pool_1",
+    "name": "Motor Pool",
+    "category": "maintenance",
+    "location": [
+      35.0,
+      20.0
+    ],
+    "belief": {
+      "satisfaction": 0.6,
+      "price": 0.8,
+      "convenience": 0.5,
+      "atmosphere": 0.4
+    },
+    "belief_sigma": {
+      "satisfaction": 0.3,
+      "price": 0.3,
+      "convenience": 0.3,
+      "atmosphere": 0.3
+    },
+    "effects": {
+      "energy": -1.2,
+      "hunger": 0.8,
+      "social": 0.6,
+      "weapon_strength": 1.5,
+      "management_skill": 0.5,
+      "sociability": 0.4,
+      "power": 1.2
+    }
+  },
+  {
+    "id": "outdoor_training_1",
+    "name": "Outdoor Training Course",
+    "category": "outdoor",
+    "location": [
+      40.0,
+      30.0
+    ],
+    "belief": {
+      "satisfaction": 0.8,
+      "price": 0.9,
+      "convenience": 0.3,
+      "atmosphere": 0.9
+    },
+    "belief_sigma": {
+      "satisfaction": 0.2,
+      "price": 0.2,
+      "convenience": 0.3,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": -2.2,
+      "hunger": 1.8,
+      "social": 1.0,
+      "weapon_strength": 1.8,
+      "management_skill": -0.4,
+      "sociability": 0.8,
+      "power": 3.2
+    }
+  },
+  {
+    "id": "chapel_1",
+    "name": "Base Chapel",
+    "category": "spiritual",
+    "location": [
+      6.0,
+      15.0
+    ],
+    "belief": {
+      "satisfaction": 0.7,
+      "price": 1.0,
+      "convenience": 0.6,
+      "atmosphere": 0.9
+    },
+    "belief_sigma": {
+      "satisfaction": 0.3,
+      "price": 0.1,
+      "convenience": 0.2,
+      "atmosphere": 0.2
+    },
+    "effects": {
+      "energy": 1.5,
+      "hunger": 0.0,
+      "social": 1.2,
+      "weapon_strength": -0.2,
+      "management_skill": 0.2,
+      "sociability": 1.5,
+      "power": -0.3
+    }
+  },
+  {
+    "id": "supply_depot_1",
+    "name": "Supply Depot",
+    "category": "logistics",
+    "location": [
+      32.0,
+      8.0
+    ],
+    "belief": {
+      "satisfaction": 0.4,
+      "price": 0.6,
+      "convenience": 0.7,
+      "atmosphere": 0.3
+    },
+    "belief_sigma": {
+      "satisfaction": 0.3,
+      "price": 0.3,
+      "convenience": 0.2,
+      "atmosphere": 0.3
+    },
+    "effects": {
+      "energy": -0.6,
+      "hunger": 0.4,
+      "social": 0.8,
+      "weapon_strength": -0.2,
+      "management_skill": 2.0,
+      "sociability": 1.0,
+      "power": -0.3
     }
   }
 ]

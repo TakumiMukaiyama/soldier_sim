@@ -16,7 +16,8 @@
       "hunger": 0.2,
       "weapon_strength": 0.7,
       "management_skill": 0.3,
-      "sociability": 0.75
+      "sociability": 0.75,
+      "power": 0.74
     }
   },
   {
@@ -36,7 +37,8 @@
       "hunger": 0.3,
       "weapon_strength": 0.6,
       "management_skill": 0.25,
-      "sociability": 0.6
+      "sociability": 0.6,
+      "power": 0.7
     }
   },
   {
@@ -56,7 +58,8 @@
       "hunger": 0.2,
       "weapon_strength": 0.8,
       "management_skill": 0.2,
-      "sociability": 0.55
+      "sociability": 0.55,
+      "power": 0.76
     }
   },
   {
@@ -76,7 +79,8 @@
       "hunger": 0.3,
       "weapon_strength": 0.7,
       "management_skill": 0.1,
-      "sociability": 0.45
+      "sociability": 0.45,
+      "power": 0.71
     }
   },
   {
@@ -96,7 +100,8 @@
       "hunger": 0.3,
       "weapon_strength": 0.6,
       "management_skill": 0.05,
-      "sociability": 0.55
+      "sociability": 0.55,
+      "power": 0.67
     }
   },
   {
@@ -116,7 +121,8 @@
       "hunger": 0.4,
       "weapon_strength": 0.4,
       "management_skill": 0.0,
-      "sociability": 0.7
+      "sociability": 0.7,
+      "power": 0.32
     }
   },
   {
@@ -136,7 +142,8 @@
       "hunger": 0.2,
       "weapon_strength": 0.5,
       "management_skill": 0.05,
-      "sociability": 0.35
+      "sociability": 0.35,
+      "power": 0.45
     }
   },
   {
@@ -156,7 +163,8 @@
       "hunger": 0.3,
       "weapon_strength": 0.65,
       "management_skill": 0.08,
-      "sociability": 0.5
+      "sociability": 0.5,
+      "power": 0.59
     }
   },
   {
@@ -176,7 +184,8 @@
       "hunger": 0.25,
       "weapon_strength": 0.75,
       "management_skill": 0.18,
-      "sociability": 0.4
+      "sociability": 0.4,
+      "power": 0.67
     }
   },
   {
@@ -196,7 +205,8 @@
       "hunger": 0.2,
       "weapon_strength": 0.65,
       "management_skill": 0.22,
-      "sociability": 0.6
+      "sociability": 0.6,
+      "power": 0.72
     }
   },
   {
@@ -216,7 +226,8 @@
       "hunger": 0.35,
       "weapon_strength": 0.45,
       "management_skill": 0.02,
-      "sociability": 0.75
+      "sociability": 0.75,
+      "power": 0.52
     }
   },
   {
@@ -236,7 +247,8 @@
       "hunger": 0.2,
       "weapon_strength": 0.5,
       "management_skill": 0.03,
-      "sociability": 0.4
+      "sociability": 0.4,
+      "power": 0.45
     }
   },
   {
@@ -256,7 +268,8 @@
       "hunger": 0.25,
       "weapon_strength": 0.6,
       "management_skill": 0.12,
-      "sociability": 0.55
+      "sociability": 0.55,
+      "power": 0.66
     }
   },
   {
@@ -276,7 +289,8 @@
       "hunger": 0.2,
       "weapon_strength": 0.7,
       "management_skill": 0.15,
-      "sociability": 0.4
+      "sociability": 0.4,
+      "power": 0.65
     }
   },
   {
@@ -296,7 +310,8 @@
       "hunger": 0.3,
       "weapon_strength": 0.4,
       "management_skill": 0.01,
-      "sociability": 0.65
+      "sociability": 0.65,
+      "power": 0.35
     }
   },
   {
@@ -316,7 +331,8 @@
       "hunger": 0.2,
       "weapon_strength": 0.7,
       "management_skill": 0.28,
-      "sociability": 0.5
+      "sociability": 0.5,
+      "power": 0.76
     }
   },
   {
@@ -336,7 +352,8 @@
       "hunger": 0.15,
       "weapon_strength": 0.75,
       "management_skill": 0.3,
-      "sociability": 0.65
+      "sociability": 0.65,
+      "power": 0.76
     }
   },
   {
@@ -356,7 +373,8 @@
       "hunger": 0.25,
       "weapon_strength": 0.65,
       "management_skill": 0.09,
-      "sociability": 0.65
+      "sociability": 0.65,
+      "power": 0.61
     }
   },
   {
@@ -376,7 +394,8 @@
       "hunger": 0.3,
       "weapon_strength": 0.55,
       "management_skill": 0.04,
-      "sociability": 0.5
+      "sociability": 0.5,
+      "power": 0.57
     }
   },
   {
@@ -396,7 +415,8 @@
       "hunger": 0.2,
       "weapon_strength": 0.7,
       "management_skill": 0.16,
-      "sociability": 0.5
+      "sociability": 0.5,
+      "power": 0.72
     }
   }
 ]
