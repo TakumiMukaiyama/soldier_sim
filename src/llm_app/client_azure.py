@@ -1,6 +1,7 @@
-from typing import Any, Dict, Optional
+import json
 import os
-
+import re
+from typing import Any, Dict, Optional
 
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_openai import AzureChatOpenAI
@@ -86,10 +87,43 @@ class AzureGPTClient:
 
         # Parse JSON response
         try:
-            return response.json()
+            content = response.content.strip()
+
+            # Clean up common formatting issues
+            content = content.replace("```json", "").replace("```", "").strip()
+
+            # Try to extract JSON from the response if it contains additional text
+            json_match = re.search(
+                r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", content, re.DOTALL
+            )
+            if json_match:
+                json_str = json_match.group(0)
+                # Clean up any potential formatting issues
+                json_str = re.sub(
+                    r"[\x00-\x1f\x7f-\x9f]", "", json_str
+                )  # Remove control characters
+                return json.loads(json_str)
+            else:
+                # Try to parse the entire content as JSON after cleaning
+                clean_content = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", content)
+                return json.loads(clean_content)
+        except json.JSONDecodeError as e:
+            # Try one more time with a simpler regex for incomplete JSON
+            simple_match = re.search(r'\{.*?"reason".*?\}', content, re.DOTALL)
+            if simple_match:
+                try:
+                    return json.loads(simple_match.group(0))
+                except Exception as e:
+                    raise ValueError(
+                        f"Failed to parse JSON response: {e}\nResponse content: {response.content}"
+                    )
+
+            raise ValueError(
+                f"Failed to parse JSON response: {e}\nResponse content: {response.content}"
+            )
         except Exception as e:
             raise ValueError(
-                f"Failed to parse JSON response: {e}\nResponse: {response.content}"
+                f"Unexpected error parsing response: {e}\nResponse content: {response.content}"
             )
 
     def __call__(self, *args, **kwargs):

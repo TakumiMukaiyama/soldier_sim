@@ -53,9 +53,24 @@ class PlanOutput(BaseModel):
 
     agent_id: str = Field(..., description="Agent's unique ID")
     chosen_poi: str = Field(..., description="ID of the POI to visit next")
-    activity: Literal["train", "eat", "rest", "manage", "arm", "socialize"] = Field(
-        ..., description="Activity to perform at the POI"
-    )
+    activity: Literal[
+        "train",
+        "eat",
+        "rest",
+        "manage",
+        "arm",
+        "socialize",
+        "heal",
+        "exercise",
+        "study",
+        "craft",
+        "communicate",
+        "maintain",
+        "outdoor_train",
+        "reflect",
+        "organize",
+        "idle",
+    ] = Field(..., description="Activity to perform at the POI")
     expected_duration: int = Field(
         ..., ge=1, le=8, description="Expected duration of the activity in hours"
     )

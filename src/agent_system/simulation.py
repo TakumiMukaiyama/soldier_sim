@@ -58,7 +58,9 @@ RANDOM_EVENTS = {
         "duration": 2,
         "forced_poi_category": "spiritual",
         "effects": {"energy": -10.0, "social": -5.0, "power": -3.0},
-        "required_conditions": ["high_activity"],  # Only when agent has been very active
+        "required_conditions": [
+            "high_activity"
+        ],  # Only when agent has been very active
     },
 }
 
@@ -76,7 +78,9 @@ class Simulation:
         self.time_steps_per_day = time_steps_per_day
         self.current_day = 0
         self.current_step = 0
-        self.current_time = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0)  # Start at 6am
+        self.current_time = datetime.now().replace(
+            hour=6, minute=0, second=0, microsecond=0
+        )  # Start at 6am
 
         # Collections
         self.agents: Dict[str, Agent] = {}
@@ -100,7 +104,8 @@ class Simulation:
             if condition == "recent_training":
                 # Check if agent did training in last few activities
                 if not any(
-                    activity in ["train", "exercise", "outdoor_train"] for activity in agent._daily_activities[-3:]
+                    activity in ["train", "exercise", "outdoor_train"]
+                    for activity in agent._daily_activities[-3:]
                 ):
                     return False
             elif condition == "high_activity":
@@ -144,7 +149,9 @@ class Simulation:
                         new_value = max(0.0, min(100.0, current_value + value))
                         setattr(agent, effect, new_value)
 
-                logger.info(f"Event triggered for {agent_id}: {event_data['description']}")
+                logger.info(
+                    f"Event triggered for {agent_id}: {event_data['description']}"
+                )
                 break  # Only one event per agent per step
 
     def _update_active_events(self) -> None:
@@ -224,9 +231,13 @@ class Simulation:
             forced_category = event_data["forced_poi_category"]
 
             # Find POIs of the required category
-            forced_pois = [poi for poi in self.pois.values() if poi.category == forced_category]
+            forced_pois = [
+                poi for poi in self.pois.values() if poi.category == forced_category
+            ]
             if forced_pois:
-                chosen_poi = random.choice(forced_pois)  # Random selection from available POIs
+                chosen_poi = random.choice(
+                    forced_pois
+                )  # Random selection from available POIs
                 activity_map = {
                     "medical": "heal",
                     "outdoor": "outdoor_train",
@@ -250,7 +261,9 @@ class Simulation:
 
         # SLEEP PRIORITY: Force sleep during night hours if energy is low
         if is_night_time and agent.energy < 60.0:
-            rest_pois = [poi for poi in self.pois.values() if poi.category in ["rest", "sleep"]]
+            rest_pois = [
+                poi for poi in self.pois.values() if poi.category in ["rest", "sleep"]
+            ]
             if rest_pois:
                 # Prefer sleep POIs if available, otherwise use rest POIs
                 sleep_pois = [poi for poi in rest_pois if poi.category == "sleep"]
@@ -274,7 +287,9 @@ class Simulation:
                     if is_meal_time:
                         base_score *= 2.0
                     # Apply archetype preferences
-                    archetype_multiplier = agent.get_poi_preference_multiplier(poi.category)
+                    archetype_multiplier = agent.get_poi_preference_multiplier(
+                        poi.category
+                    )
                     score = base_score * archetype_multiplier
                     food_poi_scores.append((poi, score))
 
@@ -290,7 +305,9 @@ class Simulation:
                 }
 
         # Use LLM planner if available (for complex decisions)
-        if self.planner and not is_night_time:  # Don't use LLM for simple sleep decisions
+        if (
+            self.planner and not is_night_time
+        ):  # Don't use LLM for simple sleep decisions
             try:
                 recent_memories = self.memory.get_recent_memories(agent.id, limit=10)
                 reflective_memory = self.memory.get_reflective_memory(agent.id)
@@ -322,7 +339,9 @@ class Simulation:
                     "reason": plan.reason,
                 }
             except Exception as e:
-                logger.warning(f"LLM planner failed: {e}, falling back to rule-based planning")
+                logger.warning(
+                    f"LLM planner failed: {e}, falling back to rule-based planning"
+                )
 
         # RULE-BASED BACKUP LOGIC with time awareness
 
@@ -339,7 +358,9 @@ class Simulation:
                 }
 
         if agent.energy < 30.0:
-            rest_pois = [poi for poi in self.pois.values() if poi.category in ["rest", "sleep"]]
+            rest_pois = [
+                poi for poi in self.pois.values() if poi.category in ["rest", "sleep"]
+            ]
             if rest_pois:
                 chosen_poi = rest_pois[0]
                 activity = "sleep" if is_night_time else "rest"
@@ -430,7 +451,8 @@ class Simulation:
 
             # Agent's observation of POI
             observation = {
-                "satisfaction": effects.get("energy", 0) * 0.5 + effects.get("hunger", 0) * 0.5,
+                "satisfaction": effects.get("energy", 0) * 0.5
+                + effects.get("hunger", 0) * 0.5,
                 "price": 0.5,  # Placeholder
                 "convenience": 0.5,  # Placeholder
                 "atmosphere": 0.5,  # Placeholder
@@ -461,7 +483,9 @@ class Simulation:
         self.current_step = 0
 
         # Reset time to 6am next day
-        self.current_time = self.current_time.replace(hour=6, minute=0, second=0, microsecond=0)
+        self.current_time = self.current_time.replace(
+            hour=6, minute=0, second=0, microsecond=0
+        )
         self.current_time += timedelta(days=1)
 
         # Generate reflective memories for all agents

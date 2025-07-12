@@ -6,11 +6,17 @@ from typing import Any, Dict, Optional
 from langchain.schema import HumanMessage, SystemMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
+from src.utils.get_logger import get_logger
+
+logger = get_logger(__name__)
+
 
 class GeminiClient:
     """Client for Gemini API with structured output support"""
 
-    def __init__(self, api_key: Optional[str] = None, model_name: str = "gemini-2.0-flash"):
+    def __init__(
+        self, api_key: Optional[str] = None, model_name: str = "gemini-2.0-flash"
+    ):
         """
         Initialize Gemini client
 
@@ -20,7 +26,9 @@ class GeminiClient:
         """
         self.api_key = api_key or os.environ.get("GEMINI_API_KEY")
         if not self.api_key:
-            raise ValueError("Gemini API key not provided and GEMINI_API_KEY env var not set")
+            raise ValueError(
+                "Gemini API key not provided and GEMINI_API_KEY env var not set"
+            )
 
         self.model_name = model_name
         self.client = ChatGoogleGenerativeAI(
@@ -66,11 +74,15 @@ class GeminiClient:
             content = content.replace("```json", "").replace("```", "").strip()
 
             # Try to extract JSON from the response if it contains additional text
-            json_match = re.search(r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", content, re.DOTALL)
+            json_match = re.search(
+                r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", content, re.DOTALL
+            )
             if json_match:
                 json_str = json_match.group(0)
                 # Clean up any potential formatting issues
-                json_str = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", json_str)  # Remove control characters
+                json_str = re.sub(
+                    r"[\x00-\x1f\x7f-\x9f]", "", json_str
+                )  # Remove control characters
                 return json.loads(json_str)
             else:
                 # Try to parse the entire content as JSON after cleaning
@@ -82,12 +94,17 @@ class GeminiClient:
             if simple_match:
                 try:
                     return json.loads(simple_match.group(0))
-                except:
+                except Exception as e:
+                    logger.error(f"Failed to parse JSON response: {e}\nResponse content: {response.content}")
                     pass
 
-            raise ValueError(f"Failed to parse JSON response: {e}\nResponse content: {response.content}")
+            raise ValueError(
+                f"Failed to parse JSON response: {e}\nResponse content: {response.content}"
+            )
         except Exception as e:
-            raise ValueError(f"Unexpected error parsing response: {e}\nResponse content: {response.content}")
+            raise ValueError(
+                f"Unexpected error parsing response: {e}\nResponse content: {response.content}"
+            )
 
     def __call__(self, *args, **kwargs):
         """Make the client callable like a LangChain LLM"""
