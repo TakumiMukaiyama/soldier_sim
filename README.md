@@ -20,7 +20,7 @@ LLM（Gemini、Azure OpenAI）を活用した兵士育成シミュレーショ�
 
 ```bash
 # Clone repository
-git clone <repository_url>
+git clone [<repository_url>](https://github.com/TakumiMukaiyama/soldier_sim.git)
 cd soldier_sim
 
 # Install dependencies using uv
