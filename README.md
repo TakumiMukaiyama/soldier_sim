@@ -11,17 +11,6 @@ LLM（Gemini、Azure OpenAI）を活用した兵士育成シミュレーショ�
 *arXiv:2506.21805*  
 *URL: https://arxiv.org/abs/2506.21805*
 
-## Features
-
-- **Agent System**: 最大100の知的エージェントによるシミュレーション
-- **POI (Point of Interest)**: エージェントが相互作用できる戦略的拠点
-- **Memory System**: 
-  - Temporal Memory (時間ベースの経験)
-  - Reflective Memory (処理された洞察)
-  - Spatial Memory (位置ベースの情報)
-- **LLM Integration**: LLMによるエージェントの意思決定
-- **Kalman Filtering**: 確率的状態推定
-
 ## Requirements
 
 - Python 3.10+
