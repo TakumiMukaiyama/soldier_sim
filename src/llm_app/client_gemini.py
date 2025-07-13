@@ -36,6 +36,58 @@ class GeminiClient:
             api_key=self.api_key,
         )
 
+    def _clean_json_content(self, content: str) -> str:
+        """Clean content to prepare for JSON parsing
+
+        Args:
+            content: Raw response content from the model
+
+        Returns:
+            Cleaned content ready for JSON parsing
+        """
+        # Remove code block markers and whitespace
+        cleaned = content.strip()
+        cleaned = cleaned.replace("```json", "").replace("```", "").strip()
+
+        # Remove control characters
+        cleaned = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", cleaned)
+
+        return cleaned
+
+    def _extract_json(self, content: str) -> Dict[str, Any]:
+        """Extract JSON from cleaned content
+
+        Args:
+            content: Cleaned response content
+
+        Returns:
+            Parsed JSON as dict
+
+        Raises:
+            ValueError: If JSON parsing fails
+        """
+        try:
+            # First try: extract JSON object with full regex
+            json_match = re.search(
+                r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", content, re.DOTALL
+            )
+            if json_match:
+                return json.loads(json_match.group(0))
+
+            # Second try: parse entire content as JSON
+            return json.loads(content)
+
+        except json.JSONDecodeError:
+            # Third try: use simpler regex for incomplete JSON
+            simple_match = re.search(r'\{.*?"reason".*?\}', content, re.DOTALL)
+            if simple_match:
+                try:
+                    return json.loads(simple_match.group(0))
+                except Exception as e:
+                    logger.error(f"Simple JSON extraction failed: {e}")
+
+            raise ValueError(f"Failed to parse JSON from content: {content[:500]}...")
+
     def invoke_with_structured_output(
         self,
         system_prompt: str,
@@ -64,47 +116,15 @@ class GeminiClient:
         ]
 
         # Get response from model
-        response = self.client.invoke(messages)
-
-        # Parse JSON response
         try:
-            content = response.content.strip()
-
-            # Clean up common formatting issues
-            content = content.replace("```json", "").replace("```", "").strip()
-
-            # Try to extract JSON from the response if it contains additional text
-            json_match = re.search(
-                r"\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}", content, re.DOTALL
-            )
-            if json_match:
-                json_str = json_match.group(0)
-                # Clean up any potential formatting issues
-                json_str = re.sub(
-                    r"[\x00-\x1f\x7f-\x9f]", "", json_str
-                )  # Remove control characters
-                return json.loads(json_str)
-            else:
-                # Try to parse the entire content as JSON after cleaning
-                clean_content = re.sub(r"[\x00-\x1f\x7f-\x9f]", "", content)
-                return json.loads(clean_content)
-        except json.JSONDecodeError as e:
-            # Try one more time with a simpler regex for incomplete JSON
-            simple_match = re.search(r'\{.*?"reason".*?\}', content, re.DOTALL)
-            if simple_match:
-                try:
-                    return json.loads(simple_match.group(0))
-                except Exception as e:
-                    logger.error(f"Failed to parse JSON response: {e}\nResponse content: {response.content}")
-                    pass
-
-            raise ValueError(
-                f"Failed to parse JSON response: {e}\nResponse content: {response.content}"
-            )
+            response = self.client.invoke(messages)
+            content = self._clean_json_content(response.content)
+            return self._extract_json(content)
+        except ValueError as e:
+            # Add original response to error message for better debugging
+            raise ValueError(f"{str(e)}\nOriginal response: {response.content}")
         except Exception as e:
-            raise ValueError(
-                f"Unexpected error parsing response: {e}\nResponse content: {response.content}"
-            )
+            raise ValueError(f"Unexpected error in LLM request: {e}")
 
     def __call__(self, *args, **kwargs):
         """Make the client callable like a LangChain LLM"""

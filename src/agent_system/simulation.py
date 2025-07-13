@@ -1,6 +1,6 @@
 import random
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from src.agent_system.agent import Agent
 from src.agent_system.memory import Memory
@@ -58,7 +58,9 @@ RANDOM_EVENTS = {
         "duration": 2,
         "forced_poi_category": "spiritual",
         "effects": {"energy": -10.0, "social": -5.0, "power": -3.0},
-        "required_conditions": ["high_activity"],  # Only when agent has been very active
+        "required_conditions": [
+            "high_activity"
+        ],  # Only when agent has been very active
     },
 }
 
@@ -76,7 +78,9 @@ class Simulation:
         self.time_steps_per_day = time_steps_per_day
         self.current_day = 0
         self.current_step = 0
-        self.current_time = datetime.now().replace(hour=6, minute=0, second=0, microsecond=0)  # Start at 6am
+        self.current_time = datetime.now().replace(
+            hour=6, minute=0, second=0, microsecond=0
+        )  # Start at 6am
 
         # Collections
         self.agents: Dict[str, Agent] = {}
@@ -100,7 +104,8 @@ class Simulation:
             if condition == "recent_training":
                 # Check if agent did training in last few activities
                 if not any(
-                    activity in ["train", "exercise", "outdoor_train"] for activity in agent._daily_activities[-3:]
+                    activity in ["train", "exercise", "outdoor_train"]
+                    for activity in agent._daily_activities[-3:]
                 ):
                     return False
             elif condition == "high_activity":
@@ -144,7 +149,9 @@ class Simulation:
                         new_value = max(0.0, min(100.0, current_value + value))
                         setattr(agent, effect, new_value)
 
-                logger.info(f"Event triggered for {agent_id}: {event_data['description']}")
+                logger.info(
+                    f"Event triggered for {agent_id}: {event_data['description']}"
+                )
                 break  # Only one event per agent per step
 
     def _update_active_events(self) -> None:
@@ -214,43 +221,51 @@ class Simulation:
         self.logs.append(step_stats)
         return step_stats
 
-    def _choose_action(self, agent: Agent) -> Dict[str, Any]:
-        """Choose next action for an agent based on time of day, needs, and active events"""
-        current_hour = self.current_time.hour
+    def _handle_active_event(self, agent: Agent) -> Optional[Dict[str, Any]]:
+        """Handle agent actions when under an active event"""
+        if agent.id not in self.active_events:
+            return None
 
-        # Check for active events first - these override normal behavior
-        if agent.id in self.active_events:
-            event_data = self.active_events[agent.id]
-            forced_category = event_data["forced_poi_category"]
+        event_data = self.active_events[agent.id]
+        forced_category = event_data["forced_poi_category"]
 
-            # Find POIs of the required category
-            forced_pois = [poi for poi in self.pois.values() if poi.category == forced_category]
-            if forced_pois:
-                chosen_poi = random.choice(forced_pois)  # Random selection from available POIs
-                activity_map = {
-                    "medical": "heal",
-                    "outdoor": "outdoor_train",
-                    "workshop": "craft",
-                    "communications": "communicate",
-                    "spiritual": "reflect",
-                }
-                activity = activity_map.get(forced_category, "idle")
+        # Find POIs of the required category
+        forced_pois = [
+            poi for poi in self.pois.values() if poi.category == forced_category
+        ]
+        if not forced_pois:
+            return None
 
-                return {
-                    "poi_id": chosen_poi.id,
-                    "activity": activity,
-                    "expected_duration": 2,
-                    "reason": f"Event: {event_data['description']}",
-                }
+        chosen_poi = random.choice(forced_pois)  # Random selection from available POIs
+        activity_map = {
+            "medical": "heal",
+            "outdoor": "outdoor_train",
+            "workshop": "craft",
+            "communications": "communicate",
+            "spiritual": "reflect",
+        }
+        activity = activity_map.get(forced_category, "idle")
 
+        return {
+            "poi_id": chosen_poi.id,
+            "activity": activity,
+            "expected_duration": 2,
+            "reason": f"Event: {event_data['description']}",
+        }
+
+    def _handle_time_based_needs(
+        self, agent: Agent, current_hour: int
+    ) -> Optional[Dict[str, Any]]:
+        """Handle time-based needs such as sleep and meals"""
         # Time-based behavior priorities
         is_night_time = current_hour >= 22 or current_hour <= 5  # 10pm to 5am
         is_meal_time = current_hour in [12, 18]  # 12pm and 6pm
-        is_early_morning = current_hour in [6, 7, 8]  # 6am to 8am
 
         # SLEEP PRIORITY: Force sleep during night hours if energy is low
         if is_night_time and agent.energy < 60.0:
-            rest_pois = [poi for poi in self.pois.values() if poi.category in ["rest", "sleep"]]
+            rest_pois = [
+                poi for poi in self.pois.values() if poi.category in ["rest", "sleep"]
+            ]
             if rest_pois:
                 # Prefer sleep POIs if available, otherwise use rest POIs
                 sleep_pois = [poi for poi in rest_pois if poi.category == "sleep"]
@@ -274,7 +289,9 @@ class Simulation:
                     if is_meal_time:
                         base_score *= 2.0
                     # Apply archetype preferences
-                    archetype_multiplier = agent.get_poi_preference_multiplier(poi.category)
+                    archetype_multiplier = agent.get_poi_preference_multiplier(
+                        poi.category
+                    )
                     score = base_score * archetype_multiplier
                     food_poi_scores.append((poi, score))
 
@@ -289,44 +306,15 @@ class Simulation:
                     "reason": "Meal time or high hunger",
                 }
 
-        # Use LLM planner if available (for complex decisions)
-        if self.planner and not is_night_time:  # Don't use LLM for simple sleep decisions
-            try:
-                recent_memories = self.memory.get_recent_memories(agent.id, limit=10)
-                reflective_memory = self.memory.get_reflective_memory(agent.id)
+        return None
 
-                # Convert POIs to dict for planner, include time context
-                poi_list = [poi.to_dict() for poi in self.pois.values()]
+    def _handle_critical_needs(
+        self, agent: Agent, current_hour: int
+    ) -> Optional[Dict[str, Any]]:
+        """Handle critical needs like extreme hunger or fatigue"""
+        is_night_time = current_hour >= 22 or current_hour <= 5  # 10pm to 5am
 
-                # Add time context to agent state for LLM
-                agent_state = agent.to_dict()
-                agent_state["current_hour"] = current_hour
-                agent_state["time_context"] = {
-                    "is_night_time": is_night_time,
-                    "is_meal_time": is_meal_time,
-                    "is_early_morning": is_early_morning,
-                }
-                agent_state["active_event"] = self.active_events.get(agent.id, None)
-
-                # Get plan from LLM
-                plan = self.planner.plan_action(
-                    agent_state=agent_state,
-                    reflective_memory=reflective_memory,
-                    poi_list=poi_list,
-                )
-
-                return {
-                    "poi_id": plan.chosen_poi,
-                    "activity": plan.activity,
-                    "expected_duration": plan.expected_duration,
-                    "reason": plan.reason,
-                }
-            except Exception as e:
-                logger.warning(f"LLM planner failed: {e}, falling back to rule-based planning")
-
-        # RULE-BASED BACKUP LOGIC with time awareness
-
-        # Critical needs first
+        # Critical hunger
         if agent.hunger > 70.0:
             food_pois = [poi for poi in self.pois.values() if poi.category == "food"]
             if food_pois:
@@ -338,8 +326,11 @@ class Simulation:
                     "reason": "Critical hunger level",
                 }
 
+        # Critical fatigue
         if agent.energy < 30.0:
-            rest_pois = [poi for poi in self.pois.values() if poi.category in ["rest", "sleep"]]
+            rest_pois = [
+                poi for poi in self.pois.values() if poi.category in ["rest", "sleep"]
+            ]
             if rest_pois:
                 chosen_poi = rest_pois[0]
                 activity = "sleep" if is_night_time else "rest"
@@ -349,6 +340,15 @@ class Simulation:
                     "expected_duration": 2 if is_night_time else 1,
                     "reason": "Critical energy level",
                 }
+
+        return None
+
+    def _choose_archetype_based_action(
+        self, agent: Agent, current_hour: int
+    ) -> Dict[str, Any]:
+        """Choose action based on agent's archetype and time of day"""
+        is_night_time = current_hour >= 22 or current_hour <= 5  # 10pm to 5am
+        is_early_morning = current_hour in [6, 7, 8]  # 6am to 8am
 
         # Archetype-based POI selection for normal activities
         available_pois = list(self.pois.values())
@@ -412,6 +412,66 @@ class Simulation:
             "reason": "No suitable POI found",
         }
 
+    def _choose_action(self, agent: Agent) -> Dict[str, Any]:
+        """Choose next action for an agent based on time of day, needs, and active events"""
+        current_hour = self.current_time.hour
+
+        # Check for active events first - these override normal behavior
+        event_action = self._handle_active_event(agent)
+        if event_action:
+            return event_action
+
+        # Handle time-based needs
+        time_based_action = self._handle_time_based_needs(agent, current_hour)
+        if time_based_action:
+            return time_based_action
+
+        # Handle critical needs
+        critical_action = self._handle_critical_needs(agent, current_hour)
+        if critical_action:
+            return critical_action
+
+        # Use LLM planner if available (for complex decisions)
+        if (
+            self.planner and current_hour > 5 and current_hour < 22
+        ):  # Don't use LLM at night
+            try:
+                reflective_memory = self.memory.get_reflective_memory(agent.id)
+
+                # Convert POIs to dict for planner, include time context
+                poi_list = [poi.to_dict() for poi in self.pois.values()]
+
+                # Add time context to agent state for LLM
+                agent_state = agent.to_dict()
+                agent_state["current_hour"] = current_hour
+                agent_state["time_context"] = {
+                    "is_night_time": current_hour >= 22 or current_hour <= 5,
+                    "is_meal_time": current_hour in [12, 18],
+                    "is_early_morning": current_hour in [6, 7, 8],
+                }
+                agent_state["active_event"] = self.active_events.get(agent.id, None)
+
+                # Get plan from LLM
+                plan = self.planner.plan_action(
+                    agent_state=agent_state,
+                    reflective_memory=reflective_memory,
+                    poi_list=poi_list,
+                )
+
+                return {
+                    "poi_id": plan.chosen_poi,
+                    "activity": plan.activity,
+                    "expected_duration": plan.expected_duration,
+                    "reason": plan.reason,
+                }
+            except Exception as e:
+                logger.warning(
+                    f"LLM planner failed: {e}, falling back to rule-based planning"
+                )
+
+        # RULE-BASED BACKUP LOGIC: Use archetype-based selection
+        return self._choose_archetype_based_action(agent, current_hour)
+
     def _execute_action(self, agent: Agent, action: Dict[str, Any]) -> None:
         """Execute an action for an agent"""
         poi_id = action.get("poi_id")
@@ -430,7 +490,8 @@ class Simulation:
 
             # Agent's observation of POI
             observation = {
-                "satisfaction": effects.get("energy", 0) * 0.5 + effects.get("hunger", 0) * 0.5,
+                "satisfaction": effects.get("energy", 0) * 0.5
+                + effects.get("hunger", 0) * 0.5,
                 "price": 0.5,  # Placeholder
                 "convenience": 0.5,  # Placeholder
                 "atmosphere": 0.5,  # Placeholder
@@ -460,14 +521,16 @@ class Simulation:
         self.current_day += 1
         self.current_step = 0
 
-        # --- 修正: サマリー生成用の日付をadvance前に取得 ---
+        # Get summary date before advancing to next day
         summary_date_str = self.current_time.strftime("%Y-%m-%d")
 
         # Reset time to 6am next day
-        self.current_time = self.current_time.replace(hour=6, minute=0, second=0, microsecond=0)
+        self.current_time = self.current_time.replace(
+            hour=6, minute=0, second=0, microsecond=0
+        )
         self.current_time += timedelta(days=1)
 
-        # Generate reflective memories for all agents (修正: summary_date_strを使う)
+        # Generate reflective memories for all agents using the stored date
         for agent_id in self.agents:
             self.memory.generate_daily_summary(agent_id, summary_date_str)
 

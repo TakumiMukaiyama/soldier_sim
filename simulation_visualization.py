@@ -89,7 +89,9 @@ def load_and_process_data(log_dir):
         "power",
     ]
     for field in observation_fields:
-        df[f"obs_{field}"] = df["parsed_observation"].apply(lambda x: x.get(field, np.nan))
+        df[f"obs_{field}"] = df["parsed_observation"].apply(
+            lambda x: x.get(field, np.nan)
+        )
 
     # Convert time to datetime
     df["time"] = pd.to_datetime(df["time"])
@@ -123,7 +125,9 @@ def visualize_skill_progression(df, save_dir):
     daily_skills = df.groupby(df["time"].dt.date)[skill_columns].mean()
 
     for i, (col, name) in enumerate(zip(skill_columns, skill_names)):
-        plt.plot(daily_skills.index, daily_skills[col], label=name, linewidth=2, alpha=0.8)
+        plt.plot(
+            daily_skills.index, daily_skills[col], label=name, linewidth=2, alpha=0.8
+        )
 
     plt.title("Average Skill Progression Over Time", fontweight="bold", fontsize=14)
     plt.xlabel("Date")
@@ -228,25 +232,31 @@ def visualize_skill_progression(df, save_dir):
 def load_poi_categories():
     """Load POI categories mapping from pois.json"""
     try:
-        import json
-        from pathlib import Path
+        from src.utils.df_utils import load_poi_categories as utils_load_poi_categories
 
-        poi_file = Path("data/pois.json")
-        if not poi_file.exists():
+        return utils_load_poi_categories()
+    except ImportError:
+        # Fallback to local implementation if the utility function is unavailable
+        try:
+            import json
+            from pathlib import Path
+
+            poi_file = Path("data/pois.json")
+            if not poi_file.exists():
+                return {}
+
+            with open(poi_file, "r", encoding="utf-8") as f:
+                pois = json.load(f)
+
+            # Create mapping from POI ID to category
+            poi_categories = {}
+            for poi in pois:
+                poi_categories[poi["id"]] = poi["category"]
+
+            return poi_categories
+        except Exception as e:
+            logger.warning(f"Failed to load POI categories: {e}")
             return {}
-
-        with open(poi_file, "r", encoding="utf-8") as f:
-            pois = json.load(f)
-
-        # Create mapping from POI ID to category
-        poi_categories = {}
-        for poi in pois:
-            poi_categories[poi["id"]] = poi["category"]
-
-        return poi_categories
-    except Exception as e:
-        logger.warning(f"Failed to load POI categories: {e}")
-        return {}
 
 
 def aggregate_poi_by_category_pandas(df):
@@ -265,16 +275,32 @@ def aggregate_poi_by_category_pandas(df):
     return df_agg
 
 
-def create_poi_usage_heatmap_table(df, save_dir, aggregate_by_category=False):
-    """Create POI usage heatmap table with optional category aggregation.
+def setup_plot_style(title, xlabel, ylabel, legend_title=None, figsize=(12, 8)):
+    """Setup common plot style parameters"""
+    plt.figure(figsize=figsize, dpi=80)
+    plt.title(title, fontweight="bold", fontsize=14)
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.grid(True, alpha=0.3)
+
+    return plt.gca()  # Return current axes
+
+
+def get_hour_interval_labels():
+    """Get hour interval labels for 3-hour groups"""
+    return [f"{h:02d}:00-{h + 2:02d}:59" for h in [0, 3, 6, 9, 12, 15, 18, 21]]
+
+
+def prepare_poi_usage_data(df, aggregate_by_category=False):
+    """Prepare data for POI usage analysis
 
     Args:
         df: DataFrame with POI visit data
-        save_dir: Directory to save output files
         aggregate_by_category: If True, aggregate POIs by category
-    """
-    logger.info("Creating POI usage heatmap table...")
 
+    Returns:
+        Tuple of (processed_df, poi_column, all_hour_groups, title_text, y_label, csv_suffix)
+    """
     # Define all possible POI categories from archetype definitions
     ALL_POI_CATEGORIES = [
         "training",
@@ -298,9 +324,7 @@ def create_poi_usage_heatmap_table(df, save_dir, aggregate_by_category=False):
     # Extract hour from time and group into 3-hour intervals
     df = df.copy()
     df["hour"] = df["time"].dt.hour
-
-    # Map hours to 3-hour intervals: 0-2→0, 3-5→3, 6-8→6, etc.
-    df["hour_group"] = (df["hour"] // 3) * 3
+    df["hour_group"] = (df["hour"] // 3) * 3  # Map hours to 3-hour intervals
 
     # Aggregate by category if requested
     if aggregate_by_category:
@@ -324,6 +348,25 @@ def create_poi_usage_heatmap_table(df, save_dir, aggregate_by_category=False):
         title_text = "POI Usage Heatmap by 3-Hour Intervals"
         csv_suffix = ""
 
+    all_hour_groups = [0, 3, 6, 9, 12, 15, 18, 21]
+    return df, poi_column, all_hour_groups, title_text, y_label, csv_suffix
+
+
+def create_poi_usage_heatmap_table(df, save_dir, aggregate_by_category=False):
+    """Create POI usage heatmap table with optional category aggregation.
+
+    Args:
+        df: DataFrame with POI visit data
+        save_dir: Directory to save output files
+        aggregate_by_category: If True, aggregate POIs by category
+    """
+    logger.info("Creating POI usage heatmap table...")
+
+    # Prepare data
+    df, poi_column, all_hour_groups, title_text, y_label, csv_suffix = (
+        prepare_poi_usage_data(df, aggregate_by_category)
+    )
+
     # Group by POI (or category) and hour group
     poi_hourly = df.groupby([poi_column, "hour_group"]).size().unstack(fill_value=0)
 
@@ -332,7 +375,6 @@ def create_poi_usage_heatmap_table(df, save_dir, aggregate_by_category=False):
         poi_hourly = poi_hourly.reindex(sorted(poi_hourly.index))
 
     # Ensure all 3-hour intervals are represented
-    all_hour_groups = [0, 3, 6, 9, 12, 15, 18, 21]
     for hour_group in all_hour_groups:
         if hour_group not in poi_hourly.columns:
             poi_hourly[hour_group] = 0
@@ -357,7 +399,7 @@ def create_poi_usage_heatmap_table(df, save_dir, aggregate_by_category=False):
     plt.ylabel(y_label, fontsize=12)
 
     # Set x-axis labels for 3-hour intervals
-    hour_labels = [f"{h:02d}:00-{h + 2:02d}:59" for h in [0, 3, 6, 9, 12, 15, 18, 21]]
+    hour_labels = get_hour_interval_labels()
     plt.xticks(range(len(all_hour_groups)), hour_labels, rotation=45)
     plt.yticks(rotation=0)
 
@@ -367,8 +409,17 @@ def create_poi_usage_heatmap_table(df, save_dir, aggregate_by_category=False):
     plt.close()
 
     # Also create a summary table as CSV
-    poi_summary = df.groupby(poi_column).agg({poi_column: "count", "hour_group": ["min", "max", "mean"]}).round(2)
-    poi_summary.columns = ["Total_Visits", "First_Hour_Group", "Last_Hour_Group", "Avg_Hour_Group"]
+    poi_summary = (
+        df.groupby(poi_column)
+        .agg({poi_column: "count", "hour_group": ["min", "max", "mean"]})
+        .round(2)
+    )
+    poi_summary.columns = [
+        "Total_Visits",
+        "First_Hour_Group",
+        "Last_Hour_Group",
+        "Avg_Hour_Group",
+    ]
     poi_summary = poi_summary.sort_values("Total_Visits", ascending=False)
 
     csv_file = save_dir / f"poi_usage_summary{csv_suffix}.csv"
@@ -398,7 +449,9 @@ def load_poi_metadata(log_dir):
                 with open(poi_path, "r") as f:
                     pois_data = json.load(f)
                     pois_metadata = {poi["id"]: poi for poi in pois_data}
-                logger.info(f"Loaded POI metadata from {poi_path} ({len(pois_metadata)} POIs)")
+                logger.info(
+                    f"Loaded POI metadata from {poi_path} ({len(pois_metadata)} POIs)"
+                )
                 break
         else:
             logger.warning("No POI metadata file found, using POI IDs only")
@@ -438,12 +491,16 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
         category_colors[category] = category_color_palette[i]
 
     # Create individual POI heatmap
-    heatmap_files_individual = create_poi_usage_heatmap_table(df, save_dir, aggregate_by_category=False)
+    heatmap_files_individual = create_poi_usage_heatmap_table(
+        df, save_dir, aggregate_by_category=False
+    )
     files_created.extend(heatmap_files_individual)
 
     # Create category-aggregated heatmap if requested
     if create_both_versions:
-        heatmap_files_category = create_poi_usage_heatmap_table(df, save_dir, aggregate_by_category=True)
+        heatmap_files_category = create_poi_usage_heatmap_table(
+            df, save_dir, aggregate_by_category=True
+        )
         files_created.extend(heatmap_files_category)
 
     # 1. POI visit distribution
@@ -472,8 +529,17 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
         )
 
     # Create legend for POI colors - show all POIs
-    legend_elements = [plt.Rectangle((0, 0), 1, 1, facecolor=poi_colors[poi], label=poi) for poi in poi_counts.index]
-    plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc="upper left", title="All POIs", fontsize=8)
+    legend_elements = [
+        plt.Rectangle((0, 0), 1, 1, facecolor=poi_colors[poi], label=poi)
+        for poi in poi_counts.index
+    ]
+    plt.legend(
+        handles=legend_elements,
+        bbox_to_anchor=(1.05, 1),
+        loc="upper left",
+        title="All POIs",
+        fontsize=8,
+    )
 
     plt.tight_layout()
     output_file = save_dir / "poi_visit_distribution.png"
@@ -491,7 +557,9 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
 
     # Create stacked bar chart with consistent colors
     poi_colors_ordered = [poi_colors[poi] for poi in hourly_poi.columns]
-    ax = hourly_poi.plot(kind="bar", stacked=True, figsize=(12, 10), color=poi_colors_ordered)
+    _ = hourly_poi.plot(
+        kind="bar", stacked=True, figsize=(12, 10), color=poi_colors_ordered
+    )
 
     plt.title("POI Usage Patterns by 3-Hour Intervals", fontweight="bold", fontsize=16)
     plt.xlabel("Time of Day (3-hour intervals)", fontsize=12)
@@ -503,7 +571,13 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
     plt.grid(True, alpha=0.3)
 
     # Improve legend - show all POIs
-    plt.legend(title="POI ID", bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=8, title_fontsize=10)
+    plt.legend(
+        title="POI ID",
+        bbox_to_anchor=(1.05, 1),
+        loc="upper left",
+        fontsize=8,
+        title_fontsize=10,
+    )
 
     plt.tight_layout()
     output_file = save_dir / "hourly_poi_usage.png"
@@ -513,7 +587,11 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
 
     # 3. POI efficiency (visits per agent per day) - Individual POIs
     plt.figure(figsize=(12, 8), dpi=80)
-    daily_poi_usage = df.groupby([df["time"].dt.date, "poi_id", "agent_id"]).size().reset_index(name="visits")
+    daily_poi_usage = (
+        df.groupby([df["time"].dt.date, "poi_id", "agent_id"])
+        .size()
+        .reset_index(name="visits")
+    )
     poi_efficiency = daily_poi_usage.groupby("poi_id")["visits"].mean()
 
     # Use consistent colors for POIs
@@ -526,7 +604,9 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
     plt.title("Average Visits per Agent per Day by POI", fontweight="bold", fontsize=14)
     plt.xlabel("POI")
     plt.ylabel("Avg Visits per Agent per Day")
-    plt.xticks(range(len(poi_efficiency)), poi_efficiency.index, rotation=45, ha="right")
+    plt.xticks(
+        range(len(poi_efficiency)), poi_efficiency.index, rotation=45, ha="right"
+    )
     plt.ylim(0, 5)  # Set y-axis maximum to 5
     plt.grid(True, alpha=0.3)
 
@@ -543,9 +623,16 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
 
     # Create legend for POI colors - show all POIs
     legend_elements = [
-        plt.Rectangle((0, 0), 1, 1, facecolor=poi_colors[poi], label=poi) for poi in poi_efficiency.index
+        plt.Rectangle((0, 0), 1, 1, facecolor=poi_colors[poi], label=poi)
+        for poi in poi_efficiency.index
     ]
-    plt.legend(handles=legend_elements, bbox_to_anchor=(1.05, 1), loc="upper left", title="All POIs", fontsize=8)
+    plt.legend(
+        handles=legend_elements,
+        bbox_to_anchor=(1.05, 1),
+        loc="upper left",
+        title="All POIs",
+        fontsize=8,
+    )
 
     plt.tight_layout()
     output_file = save_dir / "poi_efficiency_analysis.png"
@@ -560,21 +647,34 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
         # Create category-aggregated data
         df_category = aggregate_poi_by_category_pandas(df)
         daily_category_usage = (
-            df_category.groupby([df_category["time"].dt.date, "poi_id", "agent_id"]).size().reset_index(name="visits")
+            df_category.groupby([df_category["time"].dt.date, "poi_id", "agent_id"])
+            .size()
+            .reset_index(name="visits")
         )
         category_efficiency = daily_category_usage.groupby("poi_id")["visits"].mean()
 
         # Use consistent colors for categories
-        efficiency_category_colors = [category_colors[category] for category in category_efficiency.index]
+        efficiency_category_colors = [
+            category_colors[category] for category in category_efficiency.index
+        ]
         bars = plt.bar(
             range(len(category_efficiency)),
             category_efficiency.values,
             color=efficiency_category_colors,
         )
-        plt.title("Average Visits per Agent per Day by POI Category", fontweight="bold", fontsize=14)
+        plt.title(
+            "Average Visits per Agent per Day by POI Category",
+            fontweight="bold",
+            fontsize=14,
+        )
         plt.xlabel("POI Category")
         plt.ylabel("Avg Visits per Agent per Day")
-        plt.xticks(range(len(category_efficiency)), category_efficiency.index, rotation=45, ha="right")
+        plt.xticks(
+            range(len(category_efficiency)),
+            category_efficiency.index,
+            rotation=45,
+            ha="right",
+        )
         plt.ylim(0, 5)  # Set y-axis maximum to 5
         plt.grid(True, alpha=0.3)
 
@@ -591,11 +691,17 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
 
         # Create legend for category colors
         legend_elements = [
-            plt.Rectangle((0, 0), 1, 1, facecolor=category_colors[category], label=category)
+            plt.Rectangle(
+                (0, 0), 1, 1, facecolor=category_colors[category], label=category
+            )
             for category in category_efficiency.index
         ]
         plt.legend(
-            handles=legend_elements, bbox_to_anchor=(1.05, 1), loc="upper left", title="POI Categories", fontsize=8
+            handles=legend_elements,
+            bbox_to_anchor=(1.05, 1),
+            loc="upper left",
+            title="POI Categories",
+            fontsize=8,
         )
 
         plt.tight_layout()
@@ -613,12 +719,25 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
 
     # Use consistent colors for POIs
     for poi in weekly_poi.columns:
-        plt.plot(weekly_poi.index, weekly_poi[poi], label=poi, linewidth=2, alpha=0.8, color=poi_colors[poi])
+        plt.plot(
+            weekly_poi.index,
+            weekly_poi[poi],
+            label=poi,
+            linewidth=2,
+            alpha=0.8,
+            color=poi_colors[poi],
+        )
 
     plt.title("Weekly POI Usage Trends", fontweight="bold", fontsize=14)
     plt.xlabel("Week (from simulation start)")
     plt.ylabel("Total Visits")
-    plt.legend(title="POI ID", bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=8, title_fontsize=10)
+    plt.legend(
+        title="POI ID",
+        bbox_to_anchor=(1.05, 1),
+        loc="upper left",
+        fontsize=8,
+        title_fontsize=10,
+    )
     plt.grid(True, alpha=0.3)
 
     plt.tight_layout()
@@ -633,7 +752,11 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
 
         # Create category-aggregated data for weekly trends
         df_category_trends = aggregate_poi_by_category_pandas(df)
-        weekly_category = df_category_trends.groupby([simulation_week, "poi_id"]).size().unstack(fill_value=0)
+        weekly_category = (
+            df_category_trends.groupby([simulation_week, "poi_id"])
+            .size()
+            .unstack(fill_value=0)
+        )
 
         # Use consistent colors for categories
         for category in weekly_category.columns:
@@ -649,7 +772,13 @@ def visualize_poi_usage(df, save_dir, create_both_versions=True):
         plt.title("Weekly POI Usage Trends by Category", fontweight="bold", fontsize=14)
         plt.xlabel("Week (from simulation start)")
         plt.ylabel("Total Visits")
-        plt.legend(title="POI Category", bbox_to_anchor=(1.05, 1), loc="upper left", fontsize=8, title_fontsize=10)
+        plt.legend(
+            title="POI Category",
+            bbox_to_anchor=(1.05, 1),
+            loc="upper left",
+            fontsize=8,
+            title_fontsize=10,
+        )
         plt.grid(True, alpha=0.3)
 
         plt.tight_layout()
@@ -689,7 +818,6 @@ def create_agent_movement_animation(df, save_dir):
     poi_locations = df_sampled.groupby("poi_id")[["x", "y"]].mean()
 
     # Create consistent color mapping for POIs
-    poi_categories = load_poi_categories()
     unique_pois = sorted(df_sampled["poi_id"].unique())
     poi_colors = {}
     poi_color_palette = plt.cm.Set3(np.linspace(0, 1, len(unique_pois)))
@@ -707,7 +835,15 @@ def create_agent_movement_animation(df, save_dir):
 
         # Plot POI locations with consistent colors
         for poi, location in poi_locations.iterrows():
-            ax.scatter(location["x"], location["y"], s=200, alpha=0.7, label=poi, marker="s", color=poi_colors[poi])
+            ax.scatter(
+                location["x"],
+                location["y"],
+                s=200,
+                alpha=0.7,
+                label=poi,
+                marker="s",
+                color=poi_colors[poi],
+            )
 
         # Plot agent locations
         if len(current_data) > 0:
@@ -735,7 +871,9 @@ def create_agent_movement_animation(df, save_dir):
         ax.set_ylim(df_with_coords["y"].min() - 1, df_with_coords["y"].max() + 1)
 
     # Create animation with reduced parameters for smaller file size
-    anim = FuncAnimation(fig, animate, frames=len(unique_times), interval=500, repeat=True, blit=False)
+    anim = FuncAnimation(
+        fig, animate, frames=len(unique_times), interval=500, repeat=True, blit=False
+    )
 
     # Save as GIF with optimization
     output_file = save_dir / "agent_movement.gif"
@@ -749,7 +887,9 @@ def create_agent_movement_animation(df, save_dir):
 def main():
     """Main function to run all visualizations."""
     # Setup argument parser
-    parser = argparse.ArgumentParser(description="Generate simulation visualizations for tech blog")
+    parser = argparse.ArgumentParser(
+        description="Generate simulation visualizations for tech blog"
+    )
     parser.add_argument(
         "--log-dir",
         type=str,

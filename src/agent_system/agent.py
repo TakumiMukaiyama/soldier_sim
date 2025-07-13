@@ -433,9 +433,6 @@ class Agent:
         )
 
         # Apply archetype-specific hard caps (some archetypes have natural limits)
-        archetype_data = ARCHETYPES.get(self.archetype, {})
-        skill_multipliers = archetype_data.get("skill_multipliers", {})
-
         # Archetype hard limits (prevents weapon specialists from becoming great managers, etc.)
         if self.archetype == "weapon_specialist":
             self._skill_caps["management_skill"] = min(

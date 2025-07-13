@@ -32,13 +32,17 @@ def load_agents(personas_path, count=None, config=None):
 
     # Get list of available archetypes
     available_archetypes = list(ARCHETYPES.keys())
-    
+
     # Get archetype distribution from config or use equal distribution
     archetype_weights = None
     if config and "agents" in config and "archetype_distribution" in config["agents"]:
         archetype_dist = config["agents"]["archetype_distribution"]
-        archetype_weights = [archetype_dist.get(arch, 1.0) for arch in available_archetypes]
-        logger.info(f"Using configured archetype distribution: {dict(zip(available_archetypes, archetype_weights))}")
+        archetype_weights = [
+            archetype_dist.get(arch, 1.0) for arch in available_archetypes
+        ]
+        logger.info(
+            f"Using configured archetype distribution: {dict(zip(available_archetypes, archetype_weights))}"
+        )
     else:
         # Default to equal weights if no distribution is configured
         archetype_weights = [1.0] * len(available_archetypes)
@@ -67,9 +71,7 @@ def load_agents(personas_path, count=None, config=None):
 
                 # Assign archetype based on configured weights
                 new_persona["archetype"] = random.choices(
-                    available_archetypes,
-                    weights=archetype_weights,
-                    k=1
+                    available_archetypes, weights=archetype_weights, k=1
                 )[0]
 
                 # Randomize personality slightly
@@ -111,9 +113,7 @@ def load_agents(personas_path, count=None, config=None):
         # Assign archetype if not already present, using configured weights
         if "archetype" not in persona:
             persona["archetype"] = random.choices(
-                available_archetypes,
-                weights=archetype_weights,
-                k=1
+                available_archetypes, weights=archetype_weights, k=1
             )[0]
 
         agent = Agent(

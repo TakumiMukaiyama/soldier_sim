@@ -8,13 +8,66 @@ import plotly.graph_objects as go
 import polars as pl
 
 
+def get_hour_group_labels():
+    """Get consistent hour group labels for 3-hour intervals
+
+    Returns:
+        Dict mapping hour group to label string
+    """
+    return {
+        0: "00:00-02:59",
+        3: "03:00-05:59",
+        6: "06:00-08:59",
+        9: "09:00-11:59",
+        12: "12:00-14:59",
+        15: "15:00-17:59",
+        18: "18:00-20:59",
+        21: "21:00-23:59",
+    }
+
+
+def process_time_column(df, time_column="time", add_hour_group=True):
+    """Process time column to extract hour and optionally hour group
+
+    Args:
+        df: Polars DataFrame with time column
+        time_column: Name of the time column
+        add_hour_group: If True, add hour_group column (3-hour intervals)
+
+    Returns:
+        DataFrame with processed time columns
+    """
+    # Check if time column is datetime or string
+    if pl.col(time_column).dtype == pl.Utf8:
+        # Convert string to datetime if needed
+        df = df.with_columns(
+            [
+                pl.col(time_column)
+                .str.strptime(pl.Datetime, "%Y-%m-%d %H:%M:%S")
+                .dt.hour()
+                .alias("hour")
+            ]
+        )
+    else:
+        # Already datetime
+        df = df.with_columns([pl.col(time_column).dt.hour().alias("hour")])
+
+    # Add hour group if requested
+    if add_hour_group:
+        df = df.with_columns([((pl.col("hour") // 3) * 3).alias("hour_group")])
+
+    return df
+
+
 def append_records(df: pl.DataFrame, records: List[Dict]) -> pl.DataFrame:
     """Append multiple records to a DataFrame"""
     new_df = pl.DataFrame(records)
     return pl.concat([df, new_df])
 
 
-def aggregate_daily_energy(memory_df: pl.DataFrame, agent_id: Optional[str] = None) -> pl.DataFrame:
+def aggregate_daily_energy(
+    memory_df: pl.DataFrame, agent_id: Optional[str] = None
+) -> pl.DataFrame:
     """
     Aggregate energy statistics per day
 
@@ -30,7 +83,9 @@ def aggregate_daily_energy(memory_df: pl.DataFrame, agent_id: Optional[str] = No
         filtered_df = filtered_df.filter(pl.col("agent_id") == agent_id)
 
     # Extract date from time
-    filtered_df = filtered_df.with_columns(pl.col("time").str.slice(0, 10).alias("date"))
+    filtered_df = filtered_df.with_columns(
+        pl.col("time").str.slice(0, 10).alias("date")
+    )
 
     # Group by date and get energy stats
     result = filtered_df.group_by("date").agg(
@@ -125,13 +180,19 @@ def aggregate_poi_by_category(df: pl.DataFrame) -> pl.DataFrame:
     df = df.with_columns(
         [
             pl.col("poi_id")
-            .map_elements(lambda x: poi_categories.get(x, "unknown"), return_dtype=pl.Utf8)
+            .map_elements(
+                lambda x: poi_categories.get(x, "unknown"), return_dtype=pl.Utf8
+            )
             .alias("poi_category")
         ]
     )
 
     # Group by category and aggregate
-    numeric_cols = [col for col in df.columns if col not in ["poi_id", "poi_category", "agent_id", "time"]]
+    numeric_cols = [
+        col
+        for col in df.columns
+        if col not in ["poi_id", "poi_category", "agent_id", "time"]
+    ]
 
     agg_exprs = []
     for col in numeric_cols:
@@ -154,7 +215,10 @@ def aggregate_poi_by_category(df: pl.DataFrame) -> pl.DataFrame:
 
 
 def create_poi_usage_heatmap_table_polars(
-    df: pl.DataFrame, aggregate_by_category: bool = False, width: int = 1000, height: int = 600
+    df: pl.DataFrame,
+    aggregate_by_category: bool = False,
+    width: int = 1000,
+    height: int = 600,
 ) -> go.Figure:
     """Create interactive POI usage heatmap table using Polars and Plotly
 
@@ -168,7 +232,14 @@ def create_poi_usage_heatmap_table_polars(
         Plotly figure with interactive heatmap
     """
     # Convert time to hour groups (3-hour intervals)
-    df = df.with_columns([pl.col("time").str.strptime(pl.Datetime, "%Y-%m-%d %H:%M:%S").dt.hour().alias("hour")])
+    df = df.with_columns(
+        [
+            pl.col("time")
+            .str.strptime(pl.Datetime, "%Y-%m-%d %H:%M:%S")
+            .dt.hour()
+            .alias("hour")
+        ]
+    )
 
     df = df.with_columns([((pl.col("hour") // 3) * 3).alias("hour_group")])
 
@@ -181,23 +252,18 @@ def create_poi_usage_heatmap_table_polars(
         poi_column = "poi_id"
         title_suffix = ""
 
-    # Create hour group labels
-    hour_labels = {
-        0: "00:00-02:59",
-        3: "03:00-05:59",
-        6: "06:00-08:59",
-        9: "09:00-11:59",
-        12: "12:00-14:59",
-        15: "15:00-17:59",
-        18: "18:00-20:59",
-        21: "21:00-23:59",
-    }
+    # Get hour group labels
+    hour_labels = get_hour_group_labels()
 
     # Count visits by POI and hour group
-    visit_counts = df.group_by([poi_column, "hour_group"]).agg([pl.len().alias("visit_count")])
+    visit_counts = df.group_by([poi_column, "hour_group"]).agg(
+        [pl.len().alias("visit_count")]
+    )
 
     # Create pivot table
-    pivot_data = visit_counts.pivot(index=poi_column, columns="hour_group", values="visit_count").fill_null(0)
+    pivot_data = visit_counts.pivot(
+        index=poi_column, columns="hour_group", values="visit_count"
+    ).fill_null(0)
 
     # Get all POIs and hour groups
     all_pois = sorted(pivot_data[poi_column].to_list())
@@ -248,7 +314,10 @@ def create_poi_usage_heatmap_table_polars(
 
 
 def create_agent_activity_heatmap(
-    df: pl.DataFrame, aggregate_by_category: bool = False, width: int = 1000, height: int = 600
+    df: pl.DataFrame,
+    aggregate_by_category: bool = False,
+    width: int = 1000,
+    height: int = 600,
 ) -> go.Figure:
     """Create agent activity heatmap showing activity patterns
 
@@ -261,37 +330,28 @@ def create_agent_activity_heatmap(
     Returns:
         Plotly figure with agent activity heatmap
     """
-    # Convert time to hour groups
-    df = df.with_columns([pl.col("time").str.strptime(pl.Datetime, "%Y-%m-%d %H:%M:%S").dt.hour().alias("hour")])
-
-    df = df.with_columns([((pl.col("hour") // 3) * 3).alias("hour_group")])
+    # Process time column to get hour and hour_group
+    df = process_time_column(df)
 
     # Aggregate by category if requested
     if aggregate_by_category:
         df = aggregate_poi_by_category(df)
-        poi_column = "poi_category"
         title_suffix = " (by Category)"
     else:
-        poi_column = "poi_id"
         title_suffix = ""
 
-    # Create hour group labels
-    hour_labels = {
-        0: "00:00-02:59",
-        3: "03:00-05:59",
-        6: "06:00-08:59",
-        9: "09:00-11:59",
-        12: "12:00-14:59",
-        15: "15:00-17:59",
-        18: "18:00-20:59",
-        21: "21:00-23:59",
-    }
+    # Get hour group labels
+    hour_labels = get_hour_group_labels()
 
     # Count activities by agent and hour group
-    activity_counts = df.group_by(["agent_id", "hour_group"]).agg([pl.len().alias("activity_count")])
+    activity_counts = df.group_by(["agent_id", "hour_group"]).agg(
+        [pl.len().alias("activity_count")]
+    )
 
     # Create pivot table
-    pivot_data = activity_counts.pivot(index="agent_id", columns="hour_group", values="activity_count").fill_null(0)
+    pivot_data = activity_counts.pivot(
+        index="agent_id", columns="hour_group", values="activity_count"
+    ).fill_null(0)
 
     # Get all agents and hour groups
     all_agents = sorted(pivot_data["agent_id"].to_list())
@@ -341,7 +401,9 @@ def create_agent_activity_heatmap(
     return fig
 
 
-def analyze_peak_usage_times(df: pl.DataFrame, aggregate_by_category: bool = False) -> pl.DataFrame:
+def analyze_peak_usage_times(
+    df: pl.DataFrame, aggregate_by_category: bool = False
+) -> pl.DataFrame:
     """Analyze peak usage times for each POI
 
     Args:
@@ -351,10 +413,8 @@ def analyze_peak_usage_times(df: pl.DataFrame, aggregate_by_category: bool = Fal
     Returns:
         DataFrame with peak usage analysis
     """
-    # Convert time to hour groups
-    df = df.with_columns([pl.col("time").str.strptime(pl.Datetime, "%Y-%m-%d %H:%M:%S").dt.hour().alias("hour")])
-
-    df = df.with_columns([((pl.col("hour") // 3) * 3).alias("hour_group")])
+    # Process time column to get hour and hour_group
+    df = process_time_column(df)
 
     # Aggregate by category if requested
     if aggregate_by_category:
@@ -363,20 +423,13 @@ def analyze_peak_usage_times(df: pl.DataFrame, aggregate_by_category: bool = Fal
     else:
         poi_column = "poi_id"
 
-    # Create hour group labels
-    hour_labels = {
-        0: "00:00-02:59",
-        3: "03:00-05:59",
-        6: "06:00-08:59",
-        9: "09:00-11:59",
-        12: "12:00-14:59",
-        15: "15:00-17:59",
-        18: "18:00-20:59",
-        21: "21:00-23:59",
-    }
+    # Get hour group labels
+    hour_labels = get_hour_group_labels()
 
     # Count visits by POI and hour group
-    visit_counts = df.group_by([poi_column, "hour_group"]).agg([pl.len().alias("visit_count")])
+    visit_counts = df.group_by([poi_column, "hour_group"]).agg(
+        [pl.len().alias("visit_count")]
+    )
 
     # Find peak usage time for each POI
     peak_times = visit_counts.group_by(poi_column).agg(
@@ -410,7 +463,9 @@ def analyze_peak_usage_times(df: pl.DataFrame, aggregate_by_category: bool = Fal
     return result
 
 
-def create_activity_summary_table(df: pl.DataFrame, aggregate_by_category: bool = False) -> pl.DataFrame:
+def create_activity_summary_table(
+    df: pl.DataFrame, aggregate_by_category: bool = False
+) -> pl.DataFrame:
     """Create comprehensive activity summary table
 
     Args:
@@ -420,10 +475,8 @@ def create_activity_summary_table(df: pl.DataFrame, aggregate_by_category: bool 
     Returns:
         DataFrame with activity summary statistics
     """
-    # Convert time to hour groups
-    df = df.with_columns([pl.col("time").str.strptime(pl.Datetime, "%Y-%m-%d %H:%M:%S").dt.hour().alias("hour")])
-
-    df = df.with_columns([((pl.col("hour") // 3) * 3).alias("hour_group")])
+    # Process time column to get hour and hour_group
+    df = process_time_column(df)
 
     # Aggregate by category if requested
     if aggregate_by_category:
@@ -444,20 +497,15 @@ def create_activity_summary_table(df: pl.DataFrame, aggregate_by_category: bool 
 
     # Calculate average visits per agent
     summary = summary.with_columns(
-        [(pl.col("total_visits") / pl.col("unique_agents")).round(2).alias("avg_visits_per_agent")]
+        [
+            (pl.col("total_visits") / pl.col("unique_agents"))
+            .round(2)
+            .alias("avg_visits_per_agent")
+        ]
     )
 
-    # Create hour group labels
-    hour_labels = {
-        0: "00:00-02:59",
-        3: "03:00-05:59",
-        6: "06:00-08:59",
-        9: "09:00-11:59",
-        12: "12:00-14:59",
-        15: "15:00-17:59",
-        18: "18:00-20:59",
-        21: "21:00-23:59",
-    }
+    # Get hour group labels
+    hour_labels = get_hour_group_labels()
 
     # Add hour group labels
     summary = summary.with_columns(
@@ -474,7 +522,9 @@ def create_activity_summary_table(df: pl.DataFrame, aggregate_by_category: bool 
     return summary
 
 
-def skill_progression_analysis(df: pl.DataFrame, aggregate_by_category: bool = False) -> Dict[str, pl.DataFrame]:
+def skill_progression_analysis(
+    df: pl.DataFrame, aggregate_by_category: bool = False
+) -> Dict[str, pl.DataFrame]:
     """Analyze skill progression patterns
 
     Args:
@@ -493,7 +543,9 @@ def skill_progression_analysis(df: pl.DataFrame, aggregate_by_category: bool = F
     }
 
 
-def create_poi_heatmap(memory_df: pl.DataFrame, pois_metadata: Dict[str, Dict]) -> go.Figure:
+def create_poi_heatmap(
+    memory_df: pl.DataFrame, pois_metadata: Dict[str, Dict]
+) -> go.Figure:
     """
     Create a heatmap of POI visits by time of day
 
@@ -515,7 +567,9 @@ def create_poi_heatmap(memory_df: pl.DataFrame, pois_metadata: Dict[str, Dict]) 
     df = df.with_columns(
         [
             pl.col("poi_id")
-            .map_dict({poi_id: meta["category"] for poi_id, meta in pois_metadata.items()})
+            .map_dict(
+                {poi_id: meta["category"] for poi_id, meta in pois_metadata.items()}
+            )
             .alias("category")
         ]
     )
