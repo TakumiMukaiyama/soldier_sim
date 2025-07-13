@@ -478,78 +478,95 @@ flowchart TD
     initLLM --> initPlanner[6 プランナー初期化]
     
     initPlanner --> dayLoop[7 日次ループ開始<br>（simulation_days）]
-    dayLoop --> endDay[8 前日の処理完了]
-    endDay --> updateRefMem[9 日次反射メモリ更新]
     
-    updateRefMem --> stepLoop[10 時間ステップループ開始<br>（time_steps_per_day）]
-    stepLoop --> agentIter[11 エージェントループ開始]
+    %% 日次処理の開始
+    dayLoop --> stepLoop[8 時間ステップループ開始<br>（time_steps_per_day）]
+    
+    %% ランダムイベント処理
+    stepLoop --> triggerEvents[9 ランダムイベント<br>トリガーチェック]
+    triggerEvents --> updateEvents[10 アクティブイベント更新]
+    
+    %% エージェントループの開始
+    updateEvents --> agentIter[11 エージェントループ開始]
     
     %% エージェント処理シーケンス
-    agentIter --> updateNeeds[12 需要更新<br>（エネルギー減少、空腹増加等）]
-    updateNeeds --> checkLLM{13 LLMを使用?}
+    agentIter --> updateNeeds[12 需要更新<br>（時間帯考慮）]
     
-    %% 行動計画分岐
-    checkLLM -->|Yes| llmPlan[14a LLMプランナー]
-    llmPlan --> buildPrompt[15a プロンプト構築]
-    buildPrompt --> invokeLLM[16a LLM呼び出し]
-    invokeLLM --> validateOutput[17a 構造化出力検証]
-    validateOutput --> returnPlan[18a 計画決定]
+    %% 行動決定プロセス
+    updateNeeds --> checkEvent{13 アクティブイベント<br>あり?}
+    checkEvent -->|Yes| eventAction[14a イベント対応行動]
+    checkEvent -->|No| checkTimeRules[14b 時間帯ルール確認]
     
-    checkLLM -->|No| rulePlan[14b ルールベース計画]
-    rulePlan --> checkHunger{15b 空腹度 > 0.7?}
-    checkHunger -->|Yes| findFood[16b 食事POI探索]
-    checkHunger -->|No| checkEnergy{17b エネルギー < 0.3?}
-    checkEnergy -->|Yes| findRest[18b 休憩POI探索]
-    checkEnergy -->|No| findTrain[19b 訓練POI探索]
-    findFood --> returnRulePlan[20b 計画決定]
-    findRest --> returnRulePlan
-    findTrain --> returnRulePlan
+    checkTimeRules --> isNight{15b 夜間?}
+    isNight -->|Yes & 低エネルギー| sleepAction[16b 睡眠行動]
+    isNight -->|No| isMealTime{17b 食事時間?}
+    isMealTime -->|Yes or 空腹| foodAction[18b 食事行動]
+    isMealTime -->|No| checkLLM{19b LLM使用?}
     
-    %% 行動実行と効果
-    returnPlan --> execAction[19 行動実行]
-    returnRulePlan --> execAction
-    execAction --> applyEffects[20 POI効果適用]
+    %% LLMプランナー
+    checkLLM -->|Yes| llmPlan[20b LLMプランナー]
+    llmPlan --> addContextData[21b 時間帯情報追加]
+    addContextData --> invokeLLM[22b LLM呼び出し]
+    invokeLLM --> returnPlan[23b 計画決定]
     
-    %% 信念更新プロセス
-    applyEffects --> genObs[21 観測データ生成]
-    genObs --> forDims[22 各信念次元処理]
-    forDims --> kalmanCalc[23 カルマンゲイン計算<br>K = σ_b/（σ_b+σ_o）]
-    kalmanCalc --> beliefUpd[24 信念更新<br>b_new = K×観測 + （1-K）×b_prior]
-    beliefUpd --> sigmaUpd[25 不確実性更新<br>σ_new = （1-K）×σ_b]
+    %% ルールベースフォールバック
+    checkLLM -->|No| criticalNeeds{24b 緊急ニーズ?}
+    criticalNeeds -->|Yes| criticalAction[25b 緊急対応行動]
+    criticalNeeds -->|No| scoreBasedAction[26b スコアベース選択]
     
-    %% メモリ記録処理
-    sigmaUpd --> recordTemp[26 時系列メモリ記録]
-    recordTemp --> checkBuffer{27 バッファ<br>サイズ >= 100?}
-    checkBuffer -->|Yes| flushBuffer[28 バッファをDFに変換]
-    checkBuffer -->|No| checkNextAgent[29 次エージェント確認]
-    flushBuffer --> checkNextAgent
+    %% 行動実行プロセス
+    eventAction --> execAction[27 行動実行]
+    sleepAction --> execAction
+    foodAction --> execAction
+    returnPlan --> execAction
+    criticalAction --> execAction
+    scoreBasedAction --> execAction
     
-    %% エージェントと時間ステップのループ
-    checkNextAgent{全エージェント<br>処理完了?} -->|No| agentIter
-    checkNextAgent -->|Yes| advanceTime[30 時間進行]
-    advanceTime --> checkStepEnd{31 全時間ステップ<br>完了?}
+    %% POI効果と記録
+    execAction --> applyEffects[28 POI効果適用<br>（アーキタイプ考慮）]
+    applyEffects --> updateBeliefs[29 POI信念更新]
+    updateBeliefs --> recordMemory[30 メモリ記録]
+    
+    %% メモリバッファ管理
+    recordMemory --> checkBuffer{31 バッファサイズ<br>>=100?}
+    checkBuffer -->|Yes| flushBuffer[32 バッファを<br>DataFrameに変換]
+    checkBuffer -->|No| continueAgent
+    flushBuffer --> continueAgent[33 エージェント処理継続]
+    
+    %% エージェント処理完了チェック
+    continueAgent --> checkAgentEnd{34 全エージェント完了?}
+    checkAgentEnd -->|No| agentIter
+    checkAgentEnd -->|Yes| advanceTime[35 時間進行]
+    
+    %% 時間ステップ完了チェック
+    advanceTime --> checkStepEnd{36 全時間ステップ完了?}
     checkStepEnd -->|No| stepLoop
-    checkStepEnd -->|Yes| genDailySummary[32 日次サマリー生成]
+    checkStepEnd -->|Yes| endDay[37 日終了処理]
     
-    %% 日次ループの完了確認
-    genDailySummary --> checkDayEnd{33 全日程完了?}
+    %% 日次終了処理
+    endDay --> saveSummaryDate[38 サマリー日付保存]
+    saveSummaryDate --> advanceDay[39 日付進行]
+    advanceDay --> generateSummaries[40 日次サマリー生成]
+    
+    %% 日次ループ完了チェック
+    generateSummaries --> checkDayEnd{41 全日程完了?}
     checkDayEnd -->|No| dayLoop
-    checkDayEnd -->|Yes| exitSim[34 シミュレーション完了]
+    checkDayEnd -->|Yes| exitSim[42 シミュレーション完了]
     
     %% データ出力フェーズ
-    exitSim --> saveLog[35 ログ出力]
-    saveLog --> saveTemp[36 時系列メモリ保存]
-    saveTemp --> saveReflective[37 反射メモリ保存]
-    saveReflective --> genAnalysis[38 分析用データ生成]
+    exitSim --> saveLog[43 ログ出力]
+    saveLog --> saveTemp[44 時系列メモリ保存]
+    saveTemp --> saveReflective[45 反射メモリ保存]
     
     %% 分析データ生成
-    genAnalysis --> skillGrowth[39 スキル成長分析]
-    skillGrowth --> poiUsage[40 POI使用統計]
-    poiUsage --> timeSeries[41 時系列分析]
-    timeSeries --> finish([終了])
+    saveReflective --> genAnalysis[46 分析用データ生成]
+    genAnalysis --> skillGrowth[47 スキル成長分析<br>(weapon,management,power)]
+    skillGrowth --> poiUsage[48 POI使用統計]
+    poiUsage --> finish([終了])
     
     %% スタイル設定
     classDef init fill:#d4f1f9,stroke:#05b2dc
+    classDef events fill:#fdded0,stroke:#f17c53
     classDef simulation fill:#d9d2e9,stroke:#8e7cc3
     classDef agent fill:#d9ead3,stroke:#93c47d
     classDef planning fill:#fce5cd,stroke:#f6b26b
@@ -557,11 +574,12 @@ flowchart TD
     classDef output fill:#f4cccc,stroke:#e06666
     
     class loadSettings,loadConfig,loadAgents,loadPOIs,initLLM,initPlanner init
-    class dayLoop,endDay,stepLoop,advanceTime,checkDayEnd,checkStepEnd,updateRefMem simulation
-    class agentIter,updateNeeds,execAction,applyEffects agent
-    class checkLLM,llmPlan,buildPrompt,invokeLLM,validateOutput,returnPlan,rulePlan,checkHunger,checkEnergy,findFood,findRest,findTrain,returnRulePlan planning
-    class genObs,forDims,kalmanCalc,beliefUpd,sigmaUpd,recordTemp,checkBuffer,flushBuffer memory
-    class exitSim,saveLog,saveTemp,saveReflective,genAnalysis,skillGrowth,poiUsage,timeSeries output
+    class triggerEvents,updateEvents,eventAction events
+    class dayLoop,stepLoop,endDay,advanceTime,saveSummaryDate,advanceDay,checkDayEnd,checkStepEnd,generateSummaries simulation
+    class agentIter,updateNeeds,execAction,applyEffects,updateBeliefs agent
+    class checkEvent,checkTimeRules,isNight,isMealTime,checkLLM,llmPlan,addContextData,invokeLLM,returnPlan,criticalNeeds,criticalAction,scoreBasedAction,sleepAction,foodAction planning
+    class recordMemory,checkBuffer,flushBuffer,continueAgent memory
+    class exitSim,saveLog,saveTemp,saveReflective,genAnalysis,skillGrowth,poiUsage output
 ```
 
 ### 3.2 メイン処理ループ

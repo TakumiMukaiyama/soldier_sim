@@ -162,18 +162,7 @@ python main.py --use-llm
 python main.py --output results/experiment1
 ```
 
-### Running Tests
 
-```bash
-uv run pytest
-```
-
-### Jupyter Notebook
-
-```bash
-# Check simulation results and analysis
-jupyter notebook check.ipynb
-```
 
 ## Project Structure
 
