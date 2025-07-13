@@ -11,8 +11,12 @@ from src.agent_system.poi import POI
 class Memory:
     """Memory system for agents including temporal, reflective, and spatial memory"""
 
-    def __init__(self):
-        """Initialize empty memory dataframes"""
+    def __init__(self, buffer_size: int = 100):
+        """Initialize empty memory dataframes
+        
+        Args:
+            buffer_size: Size at which the buffer is automatically flushed
+        """
         # Temporal memory - records of all agent actions and observations
         self.temporal_memory = pl.DataFrame(
             schema={
@@ -42,9 +46,22 @@ class Memory:
 
         # Initialize temporal memory buffer for batch processing
         self._temporal_memory_buffer: List[Dict[str, Any]] = []
+        self._buffer_size = buffer_size
 
         # Reflective memory - daily summaries by agent
         self.reflective_memory = {}  # agent_id -> date -> summary_dict
+
+    def _append_to_buffer(self, record: Dict[str, Any]) -> None:
+        """Append a record to the buffer and flush if needed
+        
+        Args:
+            record: The record to append
+        """
+        self._temporal_memory_buffer.append(record)
+        
+        # Auto-flush if buffer gets too large
+        if len(self._temporal_memory_buffer) >= self._buffer_size:
+            self._flush_buffer()
 
     def _flush_buffer(self) -> None:
         """Flush the buffer to the temporal memory DataFrame"""
@@ -113,14 +130,71 @@ class Memory:
         }
 
         # Append to temporal memory buffer
-        self._temporal_memory_buffer.append(new_record)
-
-        # Flush buffer if it's getting large
-        if len(self._temporal_memory_buffer) >= 100:
-            self._flush_buffer()
+        self._append_to_buffer(new_record)
 
         return node_id
 
+    def _calculate_statistics(self, daily_df: pl.DataFrame) -> Dict[str, Any]:
+        """Calculate statistics from daily activities
+        
+        Args:
+            daily_df: DataFrame with daily activities for an agent
+            
+        Returns:
+            Dictionary with calculated statistics
+        """
+        return {
+            "activity_count": len(daily_df),
+            "activity_distribution": self._get_activity_distribution(daily_df),
+            "most_visited_poi": self._get_most_visited_poi(daily_df),
+            "energy_stats": {
+                "start": daily_df["current_energy"].first(),
+                "end": daily_df["current_energy"].last(),
+                "avg": daily_df["current_energy"].mean(),
+                "min": daily_df["current_energy"].min(),
+                "max": daily_df["current_energy"].max(),
+            },
+            "hunger_stats": {
+                "start": daily_df["current_hunger"].first(),
+                "end": daily_df["current_hunger"].last(),
+                "avg": daily_df["current_hunger"].mean(),
+            },
+            "weapon_strength_change": daily_df["current_weapon_strength"].last()
+            - daily_df["current_weapon_strength"].first(),
+            "management_skill_change": daily_df["current_management_skill"].last()
+            - daily_df["current_management_skill"].first(),
+            "power_change": daily_df["current_power"].last()
+            - daily_df["current_power"].first(),
+        }
+    
+    def _get_activity_distribution(self, df: pl.DataFrame) -> Dict:
+        """Get distribution of activities
+        
+        Args:
+            df: DataFrame with activities
+            
+        Returns:
+            Dictionary with activity distribution
+        """
+        return df.group_by("activity_key").len().sort("len", descending=True).to_dict()
+    
+    def _get_most_visited_poi(self, df: pl.DataFrame) -> Dict:
+        """Get most visited POI
+        
+        Args:
+            df: DataFrame with POI visits
+            
+        Returns:
+            Dictionary with most visited POI
+        """
+        return (
+            df.group_by("poi_id")
+            .len()
+            .sort("len", descending=True)
+            .head(1)
+            .to_dict()
+        )
+    
     def generate_daily_summary(self, agent_id: str, date: str) -> Dict[str, Any]:
         """
         Generate a reflective summary for an agent for a specific day
@@ -144,37 +218,8 @@ class Memory:
             return {"no_activity": True}
 
         # Generate summary statistics
-        summary = {
-            "date": date,
-            "activity_count": len(daily_df),
-            "activity_distribution": daily_df.group_by("activity_key")
-            .len()
-            .sort("len", descending=True)
-            .to_dict(),
-            "most_visited_poi": daily_df.group_by("poi_id")
-            .len()
-            .sort("len", descending=True)
-            .head(1)
-            .to_dict(),
-            "energy_stats": {
-                "start": daily_df["current_energy"].first(),
-                "end": daily_df["current_energy"].last(),
-                "avg": daily_df["current_energy"].mean(),
-                "min": daily_df["current_energy"].min(),
-                "max": daily_df["current_energy"].max(),
-            },
-            "hunger_stats": {
-                "start": daily_df["current_hunger"].first(),
-                "end": daily_df["current_hunger"].last(),
-                "avg": daily_df["current_hunger"].mean(),
-            },
-            "weapon_strength_change": daily_df["current_weapon_strength"].last()
-            - daily_df["current_weapon_strength"].first(),
-            "management_skill_change": daily_df["current_management_skill"].last()
-            - daily_df["current_management_skill"].first(),
-            "power_change": daily_df["current_power"].last()
-            - daily_df["current_power"].first(),
-        }
+        summary = {"date": date}
+        summary.update(self._calculate_statistics(daily_df))
 
         # Store in reflective memory
         if agent_id not in self.reflective_memory:

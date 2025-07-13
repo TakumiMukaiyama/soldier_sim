@@ -6,7 +6,8 @@ from pathlib import Path
 
 import yaml
 
-from src.agent_system.agent import ARCHETYPES, Agent
+from src.agent_system.agent import Agent
+from src.agent_system.archetypes import ARCHETYPES
 from src.agent_system.poi import POI
 from src.agent_system.simulation import Simulation
 from src.configs.settings import app_settings
@@ -25,176 +26,324 @@ def load_config(config_path):
         return yaml.safe_load(f)
 
 
+def _get_archetype_weights(config, available_archetypes):
+    """Get archetype distribution weights from config or use equal distribution
+    
+    Args:
+        config: Configuration dictionary
+        available_archetypes: List of available agent archetypes
+        
+    Returns:
+        List of weights corresponding to available_archetypes
+    """
+    if config and "agents" in config and "archetype_distribution" in config["agents"]:
+        archetype_dist = config["agents"]["archetype_distribution"]
+        weights = [archetype_dist.get(arch, 1.0) for arch in available_archetypes]
+        logger.info(
+            f"Using configured archetype distribution: {dict(zip(available_archetypes, weights))}"
+        )
+        return weights
+    
+    # Default to equal weights if no distribution is configured
+    weights = [1.0] * len(available_archetypes)
+    logger.info("Using equal archetype distribution (no configuration found)")
+    return weights
+
+
+def _randomize_persona_attributes(persona, archetype, available_archetypes, archetype_weights):
+    """Randomize persona attributes to make it unique
+    
+    Args:
+        persona: The persona dictionary to modify
+        archetype: Optional archetype to assign, otherwise randomly chosen
+        available_archetypes: List of available archetypes
+        archetype_weights: List of weights for selecting archetypes
+        
+    Returns:
+        Modified persona dictionary
+    """
+    # Clone the persona to avoid modifying the original
+    new_persona = persona.copy()
+    
+    # Assign archetype if provided or not already present
+    if archetype:
+        new_persona["archetype"] = archetype
+    elif "archetype" not in new_persona:
+        new_persona["archetype"] = random.choices(
+            available_archetypes, weights=archetype_weights, k=1
+        )[0]
+    
+    # Randomize personality traits
+    if "personality" in new_persona:
+        for trait in new_persona["personality"]:
+            new_persona["personality"][trait] = max(
+                0.1,
+                min(
+                    0.9,
+                    new_persona["personality"][trait] + random.uniform(-0.2, 0.2),
+                ),
+            )
+    
+    # Randomize initial stats
+    if "initial_stats" in new_persona:
+        for stat in new_persona["initial_stats"]:
+            if stat == "management_skill":
+                # Special handling for management_skill: keep it in 0.0-0.3 range
+                base_value = new_persona["initial_stats"][stat]
+                new_value = base_value + random.uniform(-0.1, 0.1)
+                new_persona["initial_stats"][stat] = max(0.0, min(0.3, new_value))
+            else:
+                # Normal randomization for other stats
+                new_persona["initial_stats"][stat] = max(
+                    0.1,
+                    min(
+                        0.9,
+                        new_persona["initial_stats"][stat] + random.uniform(-0.15, 0.15),
+                    ),
+                )
+    
+    return new_persona
+
+
+def _create_additional_agents(data, count, available_archetypes, archetype_weights):
+    """Create additional agents if more are needed than available in data
+    
+    Args:
+        data: List of existing persona dictionaries
+        count: Total number of agents needed
+        available_archetypes: List of available archetypes
+        archetype_weights: List of weights for selecting archetypes
+        
+    Returns:
+        Expanded list of persona dictionaries
+    """
+    original_count = len(data)
+    result_data = data.copy()
+    
+    for i in range(original_count, count):
+        # Clone a random persona
+        base_persona = random.choice(data).copy()
+        
+        # Assign new ID
+        base_persona["id"] = f"agent_{i + 1}"
+        
+        # Randomize age
+        base_persona["age"] = random.randint(19, 40)
+        
+        # Assign fixed rank
+        base_persona["rank"] = "private"
+        
+        # Assign random archetype based on weights
+        archetype = random.choices(
+            available_archetypes, weights=archetype_weights, k=1
+        )[0]
+        
+        # Randomize other attributes
+        new_persona = _randomize_persona_attributes(
+            base_persona, archetype, available_archetypes, archetype_weights
+        )
+        
+        # Add to data
+        result_data.append(new_persona)
+    
+    return result_data
+
+
+def _create_agent_from_persona(persona):
+    """Create an Agent object from a persona dictionary
+    
+    Args:
+        persona: Dictionary containing agent attributes
+        
+    Returns:
+        Agent object
+    """
+    return Agent(
+        agent_id=persona.get("id"),
+        age=persona.get("age", 30),
+        personality=persona.get("personality", {}),
+        rank=persona.get("rank", "private"),
+        archetype=persona.get("archetype"),
+        energy=persona.get("initial_stats", {}).get("energy", 1.0),
+        social=persona.get("initial_stats", {}).get("social", 0.5),
+        hunger=persona.get("initial_stats", {}).get("hunger", 0.0),
+        weapon_strength=persona.get("initial_stats", {}).get("weapon_strength", 0.5),
+        management_skill=persona.get("initial_stats", {}).get("management_skill", 0.3),
+        sociability=persona.get("initial_stats", {}).get("sociability", 0.5),
+        power=persona.get("initial_stats", {}).get("power", 0.5),
+    )
+
+
 def load_agents(personas_path, count=None, config=None):
-    """Load agent personas from JSON file with configurable archetype distribution"""
+    """Load agent personas from JSON file with configurable archetype distribution
+    
+    Args:
+        personas_path: Path to the JSON file containing persona data
+        count: Optional number of agents to create
+        config: Optional configuration dictionary
+        
+    Returns:
+        List of Agent objects
+    """
+    # Load persona data from file
     with open(personas_path, "r") as f:
         data = json.load(f)
 
     # Get list of available archetypes
     available_archetypes = list(ARCHETYPES.keys())
 
-    # Get archetype distribution from config or use equal distribution
-    archetype_weights = None
-    if config and "agents" in config and "archetype_distribution" in config["agents"]:
-        archetype_dist = config["agents"]["archetype_distribution"]
-        archetype_weights = [
-            archetype_dist.get(arch, 1.0) for arch in available_archetypes
-        ]
-        logger.info(
-            f"Using configured archetype distribution: {dict(zip(available_archetypes, archetype_weights))}"
-        )
-    else:
-        # Default to equal weights if no distribution is configured
-        archetype_weights = [1.0] * len(available_archetypes)
-        logger.info("Using equal archetype distribution (no configuration found)")
+    # Get archetype weights from config
+    archetype_weights = _get_archetype_weights(config, available_archetypes)
 
-    # If a specific count is requested, handle it
+    # Handle specific count request
     if count is not None:
         if count <= len(data):
             # If we need fewer agents than available, sample randomly
             data = random.sample(data, count)
         else:
-            # If we need more agents than available, clone and modify existing ones
-            original_count = len(data)
-            for i in range(original_count, count):
-                # Clone a random persona
-                new_persona = random.choice(data).copy()
+            # If we need more agents than available, create additional ones
+            data = _create_additional_agents(data, count, available_archetypes, archetype_weights)
 
-                # Modify the cloned persona to make it unique
-                new_persona["id"] = f"agent_{i + 1}"
-
-                # Randomize some attributes
-                new_persona["age"] = random.randint(19, 40)
-
-                # Assign fixed rank (removing rank selection logic)
-                new_persona["rank"] = "private"
-
-                # Assign archetype based on configured weights
-                new_persona["archetype"] = random.choices(
-                    available_archetypes, weights=archetype_weights, k=1
-                )[0]
-
-                # Randomize personality slightly
-                for trait in new_persona["personality"]:
-                    new_persona["personality"][trait] = max(
-                        0.1,
-                        min(
-                            0.9,
-                            new_persona["personality"][trait]
-                            + random.uniform(-0.2, 0.2),
-                        ),
-                    )
-
-                # Randomize initial stats slightly
-                for stat in new_persona["initial_stats"]:
-                    if stat == "management_skill":
-                        # Special handling for management_skill: keep it in 0.0-0.3 range
-                        base_value = new_persona["initial_stats"][stat]
-                        new_value = base_value + random.uniform(-0.1, 0.1)
-                        new_persona["initial_stats"][stat] = max(
-                            0.0, min(0.3, new_value)
-                        )
-                    else:
-                        # Normal randomization for other stats
-                        new_persona["initial_stats"][stat] = max(
-                            0.1,
-                            min(
-                                0.9,
-                                new_persona["initial_stats"][stat]
-                                + random.uniform(-0.15, 0.15),
-                            ),
-                        )
-
-                # Add to data
-                data.append(new_persona)
-
+    # Create Agent objects from persona data
     agents = []
     for persona in data:
-        # Assign archetype if not already present, using configured weights
+        # Ensure archetype is assigned
         if "archetype" not in persona:
-            persona["archetype"] = random.choices(
-                available_archetypes, weights=archetype_weights, k=1
-            )[0]
-
-        agent = Agent(
-            agent_id=persona.get("id"),
-            age=persona.get("age", 30),
-            personality=persona.get("personality", {}),
-            rank=persona.get("rank", "private"),
-            archetype=persona.get("archetype"),
-            energy=persona.get("initial_stats", {}).get("energy", 1.0),
-            social=persona.get("initial_stats", {}).get("social", 0.5),
-            hunger=persona.get("initial_stats", {}).get("hunger", 0.0),
-            weapon_strength=persona.get("initial_stats", {}).get(
-                "weapon_strength", 0.5
-            ),
-            management_skill=persona.get("initial_stats", {}).get(
-                "management_skill", 0.3
-            ),
-            sociability=persona.get("initial_stats", {}).get("sociability", 0.5),
-            power=persona.get("initial_stats", {}).get("power", 0.5),
-        )
+            persona = _randomize_persona_attributes(
+                persona, None, available_archetypes, archetype_weights
+            )
+        
+        # Create and append agent
+        agent = _create_agent_from_persona(persona)
         agents.append(agent)
 
     return agents
 
 
+def _randomize_poi_attributes(poi_data, category=None, poi_id=None, poi_name=None):
+    """Randomize POI attributes to make it unique
+    
+    Args:
+        poi_data: The POI data dictionary to modify
+        category: Optional category to use for ID/name generation
+        poi_id: Optional explicit ID to assign
+        poi_name: Optional explicit name to assign
+        
+    Returns:
+        Modified POI dictionary
+    """
+    # Clone the POI data to avoid modifying the original
+    new_poi = poi_data.copy()
+    
+    # Assign ID and name if provided
+    if poi_id:
+        new_poi["id"] = poi_id
+    if poi_name:
+        new_poi["name"] = poi_name
+    
+    # Randomize location
+    new_poi["location"] = [random.uniform(0, 50), random.uniform(0, 50)]
+    
+    # Randomize belief values
+    if "belief" in new_poi:
+        for belief in new_poi["belief"]:
+            new_poi["belief"][belief] = max(
+                0.1,
+                min(0.9, new_poi["belief"][belief] + random.uniform(-0.2, 0.2)),
+            )
+    
+    # Randomize effect values
+    if "effects" in new_poi:
+        for effect in new_poi["effects"]:
+            # Keep the sign of the effect, but randomize magnitude
+            original = new_poi["effects"][effect]
+            sign = 1 if original >= 0 else -1
+            magnitude = abs(original)
+            new_magnitude = magnitude * random.uniform(0.8, 1.2)
+            new_poi["effects"][effect] = sign * new_magnitude
+    
+    return new_poi
+
+
+def _create_additional_pois(data, count):
+    """Create additional POIs if more are needed than available in data
+    
+    Args:
+        data: List of existing POI dictionaries
+        count: Total number of POIs needed
+        
+    Returns:
+        Expanded list of POI dictionaries
+    """
+    original_count = len(data)
+    result_data = data.copy()
+    categories = list(set([poi["category"] for poi in data]))
+    
+    for i in range(original_count, count):
+        # Choose a random category and base POI
+        category = random.choice(categories)
+        base_poi = random.choice(data).copy()
+        
+        # Generate ID and name
+        poi_id = f"{category}_{i + 1}"
+        poi_name = f"{category.title()} Area {i + 1}"
+        
+        # Randomize attributes
+        new_poi = _randomize_poi_attributes(base_poi, category, poi_id, poi_name)
+        
+        # Add to data
+        result_data.append(new_poi)
+    
+    return result_data
+
+
+def _create_poi_from_data(poi_data):
+    """Create a POI object from a data dictionary
+    
+    Args:
+        poi_data: Dictionary containing POI attributes
+        
+    Returns:
+        POI object
+    """
+    return POI(
+        poi_id=poi_data.get("id"),
+        name=poi_data.get("name", ""),
+        category=poi_data.get("category", "generic"),
+        location=poi_data.get("location", [0.0, 0.0]),
+        belief=poi_data.get("belief", {}),
+        belief_sigma=poi_data.get("belief_sigma", {}),
+        effects=poi_data.get("effects", {}),
+    )
+
+
 def load_pois(pois_path, count=None):
-    """Load POIs from JSON file"""
+    """Load POIs from JSON file
+    
+    Args:
+        pois_path: Path to the JSON file containing POI data
+        count: Optional number of POIs to create
+        
+    Returns:
+        List of POI objects
+    """
+    # Load POI data from file
     with open(pois_path, "r") as f:
         data = json.load(f)
 
-    # If a specific count is requested, handle it
+    # Handle specific count request
     if count is not None:
         if count <= len(data):
             # If we need fewer POIs than available, sample randomly
             data = random.sample(data, count)
         else:
-            # If we need more POIs than available, clone and modify existing ones
-            original_count = len(data)
-            categories = list(set([poi["category"] for poi in data]))
+            # If we need more POIs than available, create additional ones
+            data = _create_additional_pois(data, count)
 
-            for i in range(original_count, count):
-                # Clone a random POI
-                new_poi = random.choice(data).copy()
-
-                # Modify the cloned POI to make it unique
-                new_poi["id"] = f"{random.choice(categories)}_{i + 1}"
-                new_poi["name"] = f"{random.choice(categories).title()} Area {i + 1}"
-
-                # Randomize location
-                new_poi["location"] = [random.uniform(0, 50), random.uniform(0, 50)]
-
-                # Randomize belief slightly
-                for belief in new_poi["belief"]:
-                    new_poi["belief"][belief] = max(
-                        0.1,
-                        min(0.9, new_poi["belief"][belief] + random.uniform(-0.2, 0.2)),
-                    )
-
-                # Randomize effects slightly
-                for effect in new_poi["effects"]:
-                    # Keep the sign of the effect, but randomize magnitude
-                    original = new_poi["effects"][effect]
-                    sign = 1 if original >= 0 else -1
-                    magnitude = abs(original)
-                    new_magnitude = magnitude * random.uniform(0.8, 1.2)
-                    new_poi["effects"][effect] = sign * new_magnitude
-
-                # Add to data
-                data.append(new_poi)
-
+    # Create POI objects from data
     pois = []
     for poi_data in data:
-        poi = POI(
-            poi_id=poi_data.get("id"),
-            name=poi_data.get("name", ""),
-            category=poi_data.get("category", "generic"),
-            location=poi_data.get("location", [0.0, 0.0]),
-            belief=poi_data.get("belief", {}),
-            belief_sigma=poi_data.get("belief_sigma", {}),
-            effects=poi_data.get("effects", {}),
-        )
+        poi = _create_poi_from_data(poi_data)
         pois.append(poi)
 
     return pois
